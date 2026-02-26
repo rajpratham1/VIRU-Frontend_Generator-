@@ -13,6 +13,15 @@
   </head>
   <body>
     <div class="bg-glow" aria-hidden="true"></div>
+    <div id="introOverlay" class="intro-overlay hidden" aria-hidden="true">
+      <div class="intro-card">
+        <img src="{{ url_for('static', filename='images/demo.gif') }}" alt="VIRU intro animation" class="intro-gif" />
+        <div class="intro-actions">
+          <p>Welcome to VIRU Workspace</p>
+          <button id="skipIntroBtn" type="button" class="ghost-btn">Skip Animation</button>
+        </div>
+      </div>
+    </div>
 
     <header class="site-header app-header">
       <a href="/" class="brand-link" aria-label="VIRU home">

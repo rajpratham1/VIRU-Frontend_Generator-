@@ -61,6 +61,8 @@ const logsPanelEl = document.getElementById('logsPanel');
 const templateButtons = document.querySelectorAll('.template-btn');
 const templateLibraryEl = document.getElementById('templateLibrary');
 const templateCategoriesEl = document.getElementById('templateCategories');
+const introOverlayEl = document.getElementById('introOverlay');
+const skipIntroBtnEl = document.getElementById('skipIntroBtn');
 
 const TEMPLATE_LIBRARY = [
   { id: 'saas-pricing', category: 'saas', title: 'SaaS Pricing Funnel', style: 'modern saas', pages: 1, prompt: 'Build a SaaS landing page with hero, feature grid, pricing tiers, FAQ, testimonials, and final CTA.' },
@@ -84,6 +86,7 @@ const setCloneStatus = (m, e = false) => { cloneStatusEl.textContent = m; cloneS
 const setSuggestStatus = (m, e = false) => { suggestStatusEl.textContent = m; suggestStatusEl.style.color = e ? '#ffb4b4' : 'var(--muted)'; };
 const sourceLabel = (source) => (source === 'groq' ? 'Groq model output' : source === 'openai' ? 'OpenAI model output' : 'Fallback output');
 const currentPage = () => (state.result?.pages || [])[state.pageIndex] || null;
+let introTimer = null;
 
 function composePreviewDocument(page) {
   return `<!doctype html><html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><style>${page.css || ''}</style></head><body>${page.html || ''}<script>${page.js || ''}<' + '/script></body></html>`;
@@ -178,6 +181,25 @@ function setMobileView(view) {
 function toggleSettingsDrawer() {
   const opened = settingsDrawerEl.classList.toggle('is-open');
   settingsDrawerEl.setAttribute('aria-hidden', String(!opened));
+}
+
+function closeIntroOverlay() {
+  if (!introOverlayEl) return;
+  introOverlayEl.classList.add('hidden');
+  introOverlayEl.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('intro-lock');
+  if (introTimer) {
+    clearTimeout(introTimer);
+    introTimer = null;
+  }
+}
+
+function openIntroOverlay() {
+  if (!introOverlayEl) return;
+  introOverlayEl.classList.remove('hidden');
+  introOverlayEl.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('intro-lock');
+  introTimer = setTimeout(closeIntroOverlay, 5500);
 }
 
 function renderTemplateLibrary(category = 'all') {
@@ -430,11 +452,13 @@ async function initApp() {
     const auth = getAuth(app);
     onAuthStateChanged(auth, async (user) => {
       if (!user) { window.location.href = '/auth'; return; }
+      const isNewLogin = !state.user;
       state.user = user;
       authStatusEl.textContent = `Authenticated as ${user.email || user.uid}`;
       const suggestEmailEl = document.getElementById('suggestEmail');
       if (suggestEmailEl && !suggestEmailEl.value && user.email) suggestEmailEl.value = user.email;
       renderRecent();
+      if (isNewLogin) openIntroOverlay();
       await loadSharedProjectIfPresent();
     });
     logoutBtnEl.addEventListener('click', async () => { try { await signOut(auth); window.location.href = '/auth'; } catch (error) { setStatus(error.message || 'Logout failed.', true); } });
@@ -461,6 +485,7 @@ settingsToggleEl.addEventListener('click', toggleSettingsDrawer);
 suggestFormEl.addEventListener('submit', submitSuggestion);
 analyzeUrlBtn.addEventListener('click', analyzeUrl);
 enhancePromptBtn.addEventListener('click', () => { promptEl.value = enhancePrompt(promptEl.value); updatePromptHints(); setStatus('Prompt enhanced with audience, tone, and CTA.'); });
+skipIntroBtnEl?.addEventListener('click', closeIntroOverlay);
 
 promptEl.addEventListener('input', updatePromptHints);
 templateButtons.forEach((btn) => btn.addEventListener('click', () => { promptEl.value = PROMPT_TEMPLATES[btn.dataset.template] || ''; updatePromptHints(); }));

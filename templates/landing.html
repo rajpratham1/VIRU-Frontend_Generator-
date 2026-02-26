@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VIRU | AI Frontend Generator</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+  </head>
+  <body>
+    <div class="bg-glow" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <a href="/" class="brand-link" aria-label="VIRU home">
+        <div class="brand">
+          <img src="{{ url_for('static', filename='images/logo.png') }}" alt="VIRU logo" class="brand-logo" />
+          <div>
+            <p class="brand-kicker">AI Frontend Engineer</p>
+            <h1>VIRU Frontend Generator</h1>
+          </div>
+        </div>
+      </a>
+      <a href="/auth" class="primary-link">Start with Login</a>
+    </header>
+
+    <main class="landing-shell">
+      <section class="panel hero-panel">
+        <p class="hero-badge">Prompt-to-Production</p>
+        <h2>Build complete responsive websites from one prompt.</h2>
+        <p>
+          VIRU turns your idea into structured, production-ready pages with clean layout, consistent style,
+          and conversion-focused copy.
+        </p>
+        <div class="hero-cta-row">
+          <a href="/auth" class="primary-link">Start with Login</a>
+          <a href="#demo" class="ghost-link">Watch Demo</a>
+        </div>
+        <div class="hero-steps">
+          <div>
+            <span class="step-index">01</span>
+            <h4>Describe your product</h4>
+            <p>Audience, tone, sections, and CTA.</p>
+          </div>
+          <div>
+            <span class="step-index">02</span>
+            <h4>Generate with AI</h4>
+            <p>VIRU rewrites and validates output quality.</p>
+          </div>
+          <div>
+            <span class="step-index">03</span>
+            <h4>Ship faster</h4>
+            <p>Preview, copy code, and export instantly.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="demo" class="panel demo-panel">
+        <div class="demo-head">
+          <h3>Demo GIF</h3>
+          <p>Quick look at the generation flow from prompt to output.</p>
+        </div>
+        <div class="demo-gif-wrap">
+          <img src="{{ url_for('static', filename='images/demo.gif') }}" alt="VIRU demo walkthrough" class="demo-gif" />
+        </div>
+      </section>
+
+      <section class="panel usage-panel">
+        <h3>Popular Use Cases</h3>
+        <div class="usage-grid">
+          <article class="usage-card">
+            <h4>SaaS Landing</h4>
+            <p>Hero, features, pricing, FAQ, and CTA flow built in one generation.</p>
+          </article>
+          <article class="usage-card">
+            <h4>Portfolio Website</h4>
+            <p>Personal brand pages with projects, services, and lead capture section.</p>
+          </article>
+          <article class="usage-card">
+            <h4>Product Showcase</h4>
+            <p>Focused marketing pages with trust signals and conversion-oriented copy.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div>
+        <h4>About VIRU</h4>
+        <p>Open source prompt-driven frontend generator focused on practical, deployable code.</p>
+      </div>
+      <div>
+        <h4>Open Source</h4>
+        <a href="https://github.com/rajpratham1/VIRU-Frontend_Generator-" target="_blank" rel="noopener noreferrer">
+          github.com/rajpratham1/VIRU-Frontend_Generator-
+        </a>
+      </div>
+    </footer>
+  </body>
+</html>

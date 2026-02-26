@@ -15,7 +15,19 @@
     <div class="bg-glow" aria-hidden="true"></div>
     <div id="introOverlay" class="intro-overlay hidden" aria-hidden="true">
       <div class="intro-card">
-        <img src="{{ url_for('static', filename='images/demo.gif') }}" alt="VIRU intro animation" class="intro-gif" />
+        <div class="intro-media-wrap">
+          <img
+            id="introGif"
+            src="{{ url_for('static', filename='images/demo.gif') }}"
+            alt="VIRU intro animation"
+            class="intro-gif"
+            onerror="this.closest('.intro-media-wrap').classList.add('media-failed'); this.remove();"
+          />
+          <div class="intro-media-fallback">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="VIRU logo" class="intro-fallback-logo" />
+            <p>Loading VIRU workspace experience...</p>
+          </div>
+        </div>
         <div class="intro-actions">
           <p>Welcome to VIRU Workspace</p>
           <button id="skipIntroBtn" type="button" class="ghost-btn">Skip Animation</button>

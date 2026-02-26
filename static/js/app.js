@@ -63,6 +63,8 @@ const templateLibraryEl = document.getElementById('templateLibrary');
 const templateCategoriesEl = document.getElementById('templateCategories');
 const introOverlayEl = document.getElementById('introOverlay');
 const skipIntroBtnEl = document.getElementById('skipIntroBtn');
+const introVideoEl = document.getElementById('introVideo');
+const introMediaWrapEl = document.querySelector('.intro-media-wrap');
 
 const TEMPLATE_LIBRARY = [
   { id: 'saas-pricing', category: 'saas', title: 'SaaS Pricing Funnel', style: 'modern saas', pages: 1, prompt: 'Build a SaaS landing page with hero, feature grid, pricing tiers, FAQ, testimonials, and final CTA.' },
@@ -87,6 +89,7 @@ const setSuggestStatus = (m, e = false) => { suggestStatusEl.textContent = m; su
 const sourceLabel = (source) => (source === 'groq' ? 'Groq model output' : source === 'openai' ? 'OpenAI model output' : 'Fallback output');
 const currentPage = () => (state.result?.pages || [])[state.pageIndex] || null;
 let introTimer = null;
+let introEndedBound = false;
 
 function composePreviewDocument(page) {
   return `<!doctype html><html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><style>${page.css || ''}</style></head><body>${page.html || ''}<script>${page.js || ''}<' + '/script></body></html>`;
@@ -188,10 +191,26 @@ function closeIntroOverlay() {
   introOverlayEl.classList.add('hidden');
   introOverlayEl.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('intro-lock');
+  if (introVideoEl) {
+    introVideoEl.pause();
+    introVideoEl.currentTime = 0;
+    introVideoEl.muted = true;
+  }
   if (introTimer) {
     clearTimeout(introTimer);
     introTimer = null;
   }
+}
+
+function handleIntroMediaFail() {
+  if (introMediaWrapEl) {
+    introMediaWrapEl.classList.add('media-failed');
+  }
+  if (introTimer) {
+    clearTimeout(introTimer);
+    introTimer = null;
+  }
+  introTimer = setTimeout(closeIntroOverlay, 1200);
 }
 
 function openIntroOverlay() {
@@ -199,6 +218,23 @@ function openIntroOverlay() {
   introOverlayEl.classList.remove('hidden');
   introOverlayEl.setAttribute('aria-hidden', 'false');
   document.body.classList.add('intro-lock');
+  if (introVideoEl) {
+    introVideoEl.muted = true;
+    introVideoEl.loop = false;
+    introVideoEl.currentTime = 0;
+    if (!introEndedBound) {
+      introVideoEl.addEventListener('ended', closeIntroOverlay);
+      introVideoEl.addEventListener('error', handleIntroMediaFail);
+      introEndedBound = true;
+    }
+    introVideoEl.play().catch(handleIntroMediaFail);
+    const durationMs =
+      Number.isFinite(introVideoEl.duration) && introVideoEl.duration > 0
+        ? Math.min(12000, Math.max(3500, Math.round(introVideoEl.duration * 1000) + 300))
+        : 5500;
+    introTimer = setTimeout(closeIntroOverlay, durationMs);
+    return;
+  }
   introTimer = setTimeout(closeIntroOverlay, 5500);
 }
 

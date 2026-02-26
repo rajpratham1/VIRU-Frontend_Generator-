@@ -16,13 +16,16 @@
     <div id="introOverlay" class="intro-overlay hidden" aria-hidden="true">
       <div class="intro-card">
         <div class="intro-media-wrap">
-          <img
-            id="introGif"
-            src="{{ url_for('static', filename='images/demo.gif') }}"
-            alt="VIRU intro animation"
-            class="intro-gif"
-            onerror="this.closest('.intro-media-wrap').classList.add('media-failed'); this.remove();"
-          />
+          <video
+            id="introVideo"
+            class="intro-video"
+            autoplay
+            muted
+            playsinline
+            preload="auto"
+          >
+            <source src="{{ url_for('static', filename='images/demo.mp4') }}" type="video/mp4" />
+          </video>
           <div class="intro-media-fallback">
             <img src="{{ url_for('static', filename='images/logo.png') }}" alt="VIRU logo" class="intro-fallback-logo" />
             <p>Loading VIRU workspace experience...</p>

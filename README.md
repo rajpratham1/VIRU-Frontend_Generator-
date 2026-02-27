@@ -15,6 +15,13 @@ python app.py
 ```
 4. Open `http://127.0.0.1:5000`.
 
+## Pages
+
+- `/` landing
+- `/auth` login/register
+- `/app` generator
+- `/projects` My Work hub (saved generations)
+
 ## Vercel Deployment
 
 Set project root to `viru-frontend` in Vercel.
@@ -42,3 +49,20 @@ Set project root to `viru-frontend` in Vercel.
 - Suggestion form uses FormSubmit (`formsubmit.co`).
 - First FormSubmit email requires activation from receiver inbox.
 - Share links are currently in-memory on the Flask instance (not persistent).
+- Saved projects use Firebase Firestore collection `projects`.
+
+## Firestore Rules (Minimum)
+
+Use rules so each user can only access own projects:
+
+```text
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /projects/{projectId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.ownerUid;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.ownerUid;
+    }
+  }
+}
+```

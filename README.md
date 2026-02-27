@@ -52,14 +52,18 @@ Set project root to `viru-frontend` in Vercel.
 - First FormSubmit email requires activation from receiver inbox.
 - Share links are currently in-memory on the Flask instance (not persistent).
 - Saved projects now use backend APIs (`/api/projects`) and are stored in-memory on server instance.
-- One-click deploy button publishes current generated page to configured Netlify site.
+- Publish button first deploys on VIRU server domain (`/published/<id>`), then falls back to Netlify if local publish is unavailable.
 
 ## One-Click Deploy Button Setup
+
+Local publish works without Netlify env vars.
 
 1. Create a Netlify Personal Access Token.
 2. Get Netlify Site ID (Site settings -> General -> Site details).
 3. Set these env vars in local `.env` and Vercel project env:
    - `NETLIFY_ACCESS_TOKEN`
    - `NETLIFY_SITE_ID` (site id, site name, `https://<site>.netlify.app`, or `app.netlify.com/sites/<site>`)
-4. In `/app`, generate a page then click `Deploy Current Page`.
+4. In `/app`, generate a page then click `Publish Live URL`.
 5. VIRU returns live URL and copies it to clipboard.
+
+Note: local published pages are in-memory and reset on server restart/redeploy.

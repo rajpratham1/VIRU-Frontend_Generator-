@@ -12,6 +12,7 @@ const rewriteModeEl = document.getElementById('rewriteMode');
 const autoAssistModeEl = document.getElementById('autoAssistMode');
 const enhancePromptBtn = document.getElementById('enhancePromptBtn');
 const cloneUrlEl = document.getElementById('cloneUrl');
+const pasteUrlBtn = document.getElementById('pasteUrlBtn');
 const analyzeUrlBtn = document.getElementById('analyzeUrlBtn');
 const cloneStatusEl = document.getElementById('cloneStatus');
 const healthBtn = document.getElementById('healthBtn');
@@ -310,6 +311,22 @@ async function analyzeUrl() {
   }
 }
 
+async function pasteCloneUrl() {
+  if (!cloneUrlEl) return;
+  try {
+    const text = (await navigator.clipboard.readText()).trim();
+    if (!text) {
+      setCloneStatus('Clipboard is empty.', true);
+      return;
+    }
+    cloneUrlEl.value = text;
+    cloneUrlEl.focus();
+    setCloneStatus('URL pasted. Click Analyze & Remix.');
+  } catch {
+    setCloneStatus('Clipboard permission blocked. Paste manually or allow clipboard access.', true);
+  }
+}
+
 function applyResult(data) {
   state.result = data;
   state.pageIndex = 0;
@@ -437,7 +454,9 @@ async function loadSharedProjectIfPresent() {
     applyResult(data.result || {});
     setShareStatus(`Loaded shared project by ${data.share?.owner_email || 'team'} in ${state.shareMode} mode.`);
     if (state.shareMode === 'view') {
-      [promptEl, styleEl, pagesEl, qualityPresetEl, strictModeEl, rewriteModeEl, generateBtn, analyzeUrlBtn, enhancePromptBtn].forEach((el) => { el.disabled = true; });
+      [promptEl, styleEl, pagesEl, qualityPresetEl, strictModeEl, rewriteModeEl, generateBtn, analyzeUrlBtn, enhancePromptBtn, cloneUrlEl, pasteUrlBtn].forEach((el) => {
+        if (el) el.disabled = true;
+      });
       setStatus('View-only share mode enabled.');
     }
   } catch (error) {
@@ -520,6 +539,7 @@ healthBtn.addEventListener('click', runHealthCheck);
 settingsToggleEl.addEventListener('click', toggleSettingsDrawer);
 suggestFormEl.addEventListener('submit', submitSuggestion);
 analyzeUrlBtn.addEventListener('click', analyzeUrl);
+pasteUrlBtn?.addEventListener('click', pasteCloneUrl);
 enhancePromptBtn.addEventListener('click', () => { promptEl.value = enhancePrompt(promptEl.value); updatePromptHints(); setStatus('Prompt enhanced with audience, tone, and CTA.'); });
 skipIntroBtnEl?.addEventListener('click', closeIntroOverlay);
 

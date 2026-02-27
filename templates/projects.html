@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VIRU | My Work</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  </head>
+  <body>
+    <div class="bg-glow" aria-hidden="true"></div>
+
+    <header class="site-header app-header">
+      <a href="/" class="brand-link" aria-label="VIRU home">
+        <div class="brand">
+          <img src="{{ url_for('static', filename='images/logo.png') }}" alt="VIRU logo" class="brand-logo" />
+          <div>
+            <p class="brand-kicker">Workspace Hub</p>
+            <h1>My Work</h1>
+          </div>
+        </div>
+      </a>
+      <div class="app-head-actions">
+        <a href="/app" class="ghost-link">Open Generator</a>
+        <button id="logoutBtn" class="ghost-btn" type="button">Logout</button>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <section class="panel work-toolbar">
+        <div>
+          <h2>Saved Projects</h2>
+          <p id="authStatus" class="status">Checking session...</p>
+        </div>
+        <div class="inline-actions">
+          <input id="searchInput" type="text" placeholder="Search by title/style/prompt" />
+          <button id="refreshBtn" class="ghost-btn" type="button">Refresh</button>
+        </div>
+      </section>
+
+      <section class="work-grid-layout">
+        <section class="panel work-list-panel">
+          <div id="projectsGrid" class="projects-grid"></div>
+          <p id="emptyState" class="status hidden">No saved projects yet. Generate from `/app` to see them here.</p>
+        </section>
+
+        <section class="panel work-viewer-panel">
+          <div class="output-header">
+            <h2 id="viewerTitle">Select a project</h2>
+            <p id="viewerMeta" class="chip">No project selected</p>
+          </div>
+
+          <div class="code-actions">
+            <button data-code="html" class="work-code-tab active" type="button">HTML</button>
+            <button data-code="css" class="work-code-tab" type="button">CSS</button>
+            <button data-code="js" class="work-code-tab" type="button">JS</button>
+            <button id="downloadHtmlBtn" class="ghost-btn" type="button">Download HTML</button>
+            <button id="downloadZipBtn" class="ghost-btn" type="button">Export ZIP</button>
+            <button id="deleteProjectBtn" class="ghost-btn danger-btn" type="button">Delete</button>
+          </div>
+
+          <pre id="viewerCode" class="code-view"></pre>
+          <h3>Preview</h3>
+          <iframe id="viewerPreview" title="Project preview"></iframe>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="{{ url_for('static', filename='js/projects.js') }}"></script>
+  </body>
+</html>

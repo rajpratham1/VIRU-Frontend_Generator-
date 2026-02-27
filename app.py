@@ -91,6 +91,11 @@ def app_page():
     return render_template('app.html')
 
 
+@app.get('/projects')
+def projects_page():
+    return render_template('projects.html')
+
+
 @app.get('/index')
 def index_alias():
     return redirect(url_for('landing_page'), code=302)

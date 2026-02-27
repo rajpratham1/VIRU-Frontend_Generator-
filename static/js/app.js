@@ -1,7 +1,8 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
 import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
+import { addDoc, collection, getFirestore, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
 
-const state = { user: null, result: null, pageIndex: 0, activeCode: 'html', recent: [], shareMode: 'edit' };
+const state = { user: null, db: null, result: null, pageIndex: 0, activeCode: 'html', recent: [], shareMode: 'edit' };
 
 const promptEl = document.getElementById('prompt');
 const styleEl = document.getElementById('style');
@@ -339,6 +340,27 @@ function applyResult(data) {
   updateQualitySummary(data.logs || null);
 }
 
+async function saveProjectToCloud(result, promptText) {
+  if (!state.db || !state.user || !result) return;
+  try {
+    await addDoc(collection(state.db, 'projects'), {
+      ownerUid: state.user.uid,
+      ownerEmail: state.user.email || '',
+      title: result.title || 'Generated Output',
+      prompt: promptText,
+      style: styleEl.value,
+      pages: Number(pagesEl.value || 1),
+      source: result.source || 'unknown',
+      qualityScore: qualityScoreEl.textContent || '--',
+      latencyMs: result.logs?.latency_ms || 0,
+      result,
+      createdAt: serverTimestamp(),
+    });
+  } catch (error) {
+    setStatus(`Generated, but cloud save failed: ${error.message || 'Unknown error'}`, true);
+  }
+}
+
 async function generateWebsite() {
   if (state.shareMode === 'view') { setStatus('This shared project is view-only.', true); return; }
   let prompt = promptEl.value.trim();
@@ -365,6 +387,7 @@ async function generateWebsite() {
       updateQueue('done');
       setStatus('Website generated successfully.');
       saveRecentGeneration({ title: data.title || 'Generated Output', summary: (data.summary || '').slice(0, 120), latency: data.logs?.latency_ms || 0, quality: qualityScoreEl.textContent });
+      await saveProjectToCloud(data, prompt);
       generateBtn.disabled = false;
       return;
     } catch (error) {
@@ -504,6 +527,7 @@ async function initApp() {
     const missing = ['apiKey', 'authDomain', 'projectId', 'appId'].filter((k) => !firebaseCfg[k]);
     if (missing.length) throw new Error(`Firebase env is incomplete: missing ${missing.join(', ')}`);
     const app = initializeApp(firebaseCfg);
+    state.db = getFirestore(app);
     const auth = getAuth(app);
     onAuthStateChanged(auth, async (user) => {
       if (!user) { window.location.href = '/auth'; return; }

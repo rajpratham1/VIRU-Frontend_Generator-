@@ -30,6 +30,8 @@ SHARE_STORE = {}
 SHARE_LOCK = Lock()
 PROJECT_STORE = {}
 PROJECT_LOCK = Lock()
+PUBLISHED_STORE = {}
+PUBLISHED_LOCK = Lock()
 
 
 def _fresh_generator() -> WebsiteGenerator:
@@ -483,6 +485,57 @@ def submit_suggestion():
         return jsonify({'ok': True, 'message': 'Suggestion sent successfully.'})
     except Exception:
         return jsonify({'ok': False, 'error': 'Failed to send suggestion email. Check mail env settings.'}), 500
+
+
+@app.post('/api/deploy/local')
+def deploy_local_project():
+    user, auth_error = _require_auth()
+    if not user:
+        return jsonify({'ok': False, 'error': auth_error}), 401
+
+    payload = request.get_json(silent=True) or {}
+    result = payload.get('result') or {}
+    page_index = int(payload.get('page_index') or 0)
+    pages = result.get('pages') or []
+
+    if not pages:
+        return jsonify({'ok': False, 'error': 'No generated pages available to publish.'}), 400
+    if page_index < 0 or page_index >= len(pages):
+        page_index = 0
+
+    page = pages[page_index] or {}
+    html = page.get('html') or ''
+    css = page.get('css') or ''
+    js = page.get('js') or ''
+    if not html.strip():
+        return jsonify({'ok': False, 'error': 'Selected page HTML is empty.'}), 400
+
+    published_id = uuid.uuid4().hex[:14]
+    document = (
+        '<!doctype html><html lang="en"><head><meta charset="UTF-8" />'
+        '<meta name="viewport" content="width=device-width, initial-scale=1.0" />'
+        f'<style>{css}</style></head><body>{html}<script>{js}</script></body></html>'
+    )
+
+    with PUBLISHED_LOCK:
+        PUBLISHED_STORE[published_id] = {
+            'owner_uid': user.get('localId', ''),
+            'owner_email': user.get('email', ''),
+            'createdAt': datetime.now(timezone.utc).isoformat(),
+            'document': document,
+        }
+
+    live_url = f"{request.host_url.rstrip('/')}/published/{published_id}"
+    return jsonify({'ok': True, 'deploy_url': live_url, 'deploy_id': published_id, 'provider': 'viru-local'})
+
+
+@app.get('/published/<published_id>')
+def render_published_page(published_id: str):
+    with PUBLISHED_LOCK:
+        item = PUBLISHED_STORE.get(published_id)
+    if not item:
+        return 'Published page not found.', 404
+    return item.get('document') or 'Published page is empty.', 200, {'Content-Type': 'text/html; charset=utf-8'}
 
 
 @app.post('/api/deploy')

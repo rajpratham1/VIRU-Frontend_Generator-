@@ -502,21 +502,33 @@ async function deployCurrentPage() {
   }
 
   deployNowBtn.disabled = true;
-  setDeployStatus('Deploying current page...');
+  setDeployStatus('Publishing on VIRU server...');
 
   try {
-    const response = await fetch('/api/deploy', {
+    let response = await fetch('/api/deploy/local', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
       body: JSON.stringify({ result: state.result, page_index: state.pageIndex }),
     });
-    const data = await response.json();
+    let data = await response.json();
+
+    // Fallback to Netlify deploy endpoint if local publish is unavailable.
+    if (!response.ok || !data.ok) {
+      response = await fetch('/api/deploy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
+        body: JSON.stringify({ result: state.result, page_index: state.pageIndex }),
+      });
+      data = await response.json();
+    }
+
     if (!response.ok || !data.ok) throw new Error(data.error || 'Deploy failed.');
 
     deployedUrlEl.value = data.deploy_url || '';
     if (data.deploy_url) {
       await navigator.clipboard.writeText(data.deploy_url).catch(() => {});
-      setDeployStatus(`Deploy successful. Live URL ready and copied.`);
+      const provider = data.provider === 'viru-local' ? 'VIRU server' : 'Netlify';
+      setDeployStatus(`Deploy successful via ${provider}. Live URL ready and copied.`);
     } else {
       setDeployStatus('Deploy completed but live URL was not returned.', true);
     }

@@ -1,10 +1,8 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
 import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
-import { collection, deleteDoc, doc, getDocs, getFirestore, query, where } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
 
 const state = {
   user: null,
-  db: null,
   projects: [],
   filtered: [],
   selected: null,
@@ -35,9 +33,11 @@ function composeDocument(page) {
   return `<!doctype html><html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><style>${page.css || ''}</style></head><body>${page.html || ''}<script>${page.js || ''}<' + '/script></body></html>`;
 }
 
-function formatTime(ts) {
-  if (!ts?.seconds) return 'Unknown';
-  return new Date(ts.seconds * 1000).toLocaleString();
+function formatTime(value) {
+  if (!value) return 'Unknown';
+  const dt = new Date(value);
+  if (Number.isNaN(dt.getTime())) return 'Unknown';
+  return dt.toLocaleString();
 }
 
 function renderViewer() {
@@ -55,7 +55,6 @@ function renderViewer() {
   viewerMetaEl.textContent = `${project.style || 'modern saas'} • ${formatTime(project.createdAt)}`;
   viewerCodeEl.textContent = page[state.code] || '';
   viewerPreviewEl.srcdoc = composeDocument(page);
-
   codeTabs.forEach((btn) => btn.classList.toggle('active', btn.dataset.code === state.code));
 }
 
@@ -89,32 +88,8 @@ function applySearch() {
     renderList();
     return;
   }
-
-  state.filtered = state.projects.filter((p) => {
-    const stack = `${p.title || ''} ${p.style || ''} ${p.prompt || ''}`.toLowerCase();
-    return stack.includes(text);
-  });
+  state.filtered = state.projects.filter((p) => `${p.title || ''} ${p.style || ''} ${p.prompt || ''}`.toLowerCase().includes(text));
   renderList();
-}
-
-async function loadProjects() {
-  if (!state.user || !state.db) return;
-
-  setStatus('Loading saved projects...');
-  try {
-    const q = query(collection(state.db, 'projects'), where('ownerUid', '==', state.user.uid));
-    const snap = await getDocs(q);
-    state.projects = snap.docs
-      .map((d) => ({ id: d.id, ...d.data() }))
-      .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-    state.filtered = [...state.projects];
-    state.selected = state.filtered[0] || null;
-    renderList();
-    renderViewer();
-    setStatus(`Loaded ${state.projects.length} project(s).`);
-  } catch (error) {
-    setStatus(error.message || 'Failed to load projects.', true);
-  }
 }
 
 function downloadBlob(name, blob) {
@@ -148,13 +123,41 @@ async function downloadZip() {
   downloadBlob(`${(project.title || 'project').toLowerCase().replace(/[^a-z0-9]+/g, '-')}.zip`, blob);
 }
 
+async function authHeaders() {
+  if (!state.user) return {};
+  const token = await state.user.getIdToken();
+  return { Authorization: `Bearer ${token}` };
+}
+
+async function loadProjects() {
+  if (!state.user) return;
+  setStatus('Loading saved projects...');
+  try {
+    const response = await fetch('/api/projects', { headers: await authHeaders() });
+    const data = await response.json();
+    if (!response.ok || !data.ok) throw new Error(data.error || 'Failed to load projects.');
+    state.projects = (data.projects || []).slice();
+    state.filtered = [...state.projects];
+    state.selected = state.filtered[0] || null;
+    renderList();
+    renderViewer();
+    setStatus(`Loaded ${state.projects.length} project(s).`);
+  } catch (error) {
+    setStatus(error.message || 'Failed to load projects.', true);
+  }
+}
+
 async function deleteSelectedProject() {
   const project = state.selected;
-  if (!project || !state.db) return;
+  if (!project) return;
   if (!confirm(`Delete "${project.title || 'this project'}"?`)) return;
-
   try {
-    await deleteDoc(doc(state.db, 'projects', project.id));
+    const response = await fetch(`/api/projects/${encodeURIComponent(project.id)}`, {
+      method: 'DELETE',
+      headers: await authHeaders(),
+    });
+    const data = await response.json();
+    if (!response.ok || !data.ok) throw new Error(data.error || 'Delete failed.');
     state.projects = state.projects.filter((p) => p.id !== project.id);
     state.filtered = state.filtered.filter((p) => p.id !== project.id);
     state.selected = state.filtered[0] || null;
@@ -181,9 +184,7 @@ async function init() {
     if (missing.length) throw new Error(`Firebase env is incomplete: missing ${missing.join(', ')}`);
 
     const app = initializeApp(firebaseCfg);
-    state.db = getFirestore(app);
     const auth = getAuth(app);
-
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = '/auth';
@@ -193,7 +194,6 @@ async function init() {
       setStatus(`Authenticated as ${user.email || user.uid}`);
       await loadProjects();
     });
-
     logoutBtnEl.addEventListener('click', async () => {
       await signOut(auth);
       window.location.href = '/auth';

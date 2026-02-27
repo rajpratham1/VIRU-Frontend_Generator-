@@ -276,10 +276,12 @@
             <div class="feature-block">
               <h4>Deploy Connectors</h4>
               <div class="deploy-grid">
+                <button id="deployNowBtn" class="primary-btn" type="button">Deploy Current Page</button>
                 <button id="deployNetlifyBtn" class="ghost-btn" type="button">Netlify</button>
                 <button id="deployVercelBtn" class="ghost-btn" type="button">Vercel</button>
                 <button id="deployGithubBtn" class="ghost-btn" type="button">GitHub Pages</button>
               </div>
+              <input id="deployedUrl" type="text" readonly placeholder="Live deployed URL will appear here" />
               <p id="deployStatus" class="status"></p>
             </div>
           </section>

@@ -51,7 +51,7 @@ Set project root to `viru-frontend` in Vercel.
 - Suggestion form uses FormSubmit (`formsubmit.co`).
 - First FormSubmit email requires activation from receiver inbox.
 - Share links are currently in-memory on the Flask instance (not persistent).
-- Saved projects use Firebase Firestore collection `projects`.
+- Saved projects now use backend APIs (`/api/projects`) and are stored in-memory on server instance.
 - One-click deploy button publishes current generated page to configured Netlify site.
 
 ## One-Click Deploy Button Setup
@@ -60,22 +60,6 @@ Set project root to `viru-frontend` in Vercel.
 2. Get Netlify Site ID (Site settings -> General -> Site details).
 3. Set these env vars in local `.env` and Vercel project env:
    - `NETLIFY_ACCESS_TOKEN`
-   - `NETLIFY_SITE_ID`
+   - `NETLIFY_SITE_ID` (site id, site name, `https://<site>.netlify.app`, or `app.netlify.com/sites/<site>`)
 4. In `/app`, generate a page then click `Deploy Current Page`.
 5. VIRU returns live URL and copies it to clipboard.
-
-## Firestore Rules (Minimum)
-
-Use rules so each user can only access own projects:
-
-```text
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /projects/{projectId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.ownerUid;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.ownerUid;
-    }
-  }
-}
-```

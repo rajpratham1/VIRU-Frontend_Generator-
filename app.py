@@ -7,6 +7,8 @@ import re
 import uuid
 import io
 import zipfile
+from urllib.parse import urlparse
+from datetime import datetime, timezone
 from pathlib import Path
 from email.message import EmailMessage
 from threading import Lock
@@ -26,6 +28,8 @@ app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
 SHARE_STORE = {}
 SHARE_LOCK = Lock()
+PROJECT_STORE = {}
+PROJECT_LOCK = Lock()
 
 
 def _fresh_generator() -> WebsiteGenerator:
@@ -76,6 +80,48 @@ def _extract_title(html: str) -> str:
     if not match:
         return ""
     return re.sub(r"\s+", " ", match.group(1)).strip()
+
+
+def _extract_netlify_site_slug(raw_value: str) -> str:
+    value = (raw_value or "").strip()
+    if not value:
+        return ""
+    if re.fullmatch(r"[a-zA-Z0-9_-]{6,}", value):
+        return value
+    if "netlify.app" in value:
+        parsed = urlparse(value if "://" in value else f"https://{value}")
+        host = parsed.netloc or parsed.path
+        return host.split(".")[0]
+    if "app.netlify.com/sites/" in value:
+        match = re.search(r"app\.netlify\.com/sites/([^/?#]+)", value)
+        return match.group(1) if match else ""
+    return ""
+
+
+def _resolve_netlify_site_id(token: str, raw_value: str):
+    site_slug = _extract_netlify_site_slug(raw_value)
+    if not site_slug:
+        return "", "NETLIFY_SITE_ID must be a site id/name or a netlify.app/site URL."
+
+    sites_req = urllib.request.Request("https://api.netlify.com/api/v1/sites", method="GET")
+    sites_req.add_header("Authorization", f"Bearer {token}")
+    try:
+        with urllib.request.urlopen(sites_req, timeout=25) as resp:
+            sites = json.loads(resp.read().decode("utf-8"))
+    except Exception:
+        return "", "Unable to read Netlify sites list. Check NETLIFY_ACCESS_TOKEN permissions."
+
+    for site in sites:
+        candidates = {
+            str(site.get("id") or ""),
+            str(site.get("name") or ""),
+            str(site.get("url") or "").replace("https://", "").replace("http://", "").split(".")[0],
+            str(site.get("ssl_url") or "").replace("https://", "").replace("http://", "").split(".")[0],
+        }
+        if site_slug in candidates:
+            return str(site.get("id") or ""), ""
+
+    return "", f"Netlify site not found for '{raw_value}'. Use actual site URL or site name."
 
 
 @app.get('/')
@@ -311,6 +357,71 @@ def get_share(share_id: str):
     )
 
 
+@app.post('/api/projects')
+def create_project():
+    user, auth_error = _require_auth()
+    if not user:
+        return jsonify({'ok': False, 'error': auth_error}), 401
+
+    payload = request.get_json(silent=True) or {}
+    result = payload.get('result') or {}
+    if not isinstance(result, dict) or not result.get('pages'):
+        return jsonify({'ok': False, 'error': 'Generated result is required.'}), 400
+
+    project = {
+        'id': uuid.uuid4().hex[:12],
+        'owner_uid': user.get('localId', ''),
+        'owner_email': user.get('email', ''),
+        'title': (payload.get('title') or 'Generated Output').strip(),
+        'prompt': (payload.get('prompt') or '').strip(),
+        'style': (payload.get('style') or 'modern saas').strip(),
+        'pages': int(payload.get('pages') or 1),
+        'source': (payload.get('source') or '').strip(),
+        'qualityScore': (payload.get('qualityScore') or '').strip(),
+        'latencyMs': int(payload.get('latencyMs') or 0),
+        'result': result,
+        'createdAt': datetime.now(timezone.utc).isoformat(),
+    }
+
+    owner_uid = project['owner_uid']
+    with PROJECT_LOCK:
+        projects = PROJECT_STORE.get(owner_uid, [])
+        projects.insert(0, project)
+        PROJECT_STORE[owner_uid] = projects[:100]
+
+    return jsonify({'ok': True, 'project': project})
+
+
+@app.get('/api/projects')
+def list_projects():
+    user, auth_error = _require_auth()
+    if not user:
+        return jsonify({'ok': False, 'error': auth_error}), 401
+
+    owner_uid = user.get('localId', '')
+    with PROJECT_LOCK:
+        projects = list(PROJECT_STORE.get(owner_uid, []))
+    return jsonify({'ok': True, 'projects': projects})
+
+
+@app.delete('/api/projects/<project_id>')
+def delete_project(project_id: str):
+    user, auth_error = _require_auth()
+    if not user:
+        return jsonify({'ok': False, 'error': auth_error}), 401
+
+    owner_uid = user.get('localId', '')
+    with PROJECT_LOCK:
+        projects = PROJECT_STORE.get(owner_uid, [])
+        filtered = [p for p in projects if p.get('id') != project_id]
+        PROJECT_STORE[owner_uid] = filtered
+        deleted = len(filtered) != len(projects)
+
+    if not deleted:
+        return jsonify({'ok': False, 'error': 'Project not found.'}), 404
+    return jsonify({'ok': True})
+
+
 @app.post('/api/suggestions')
 def submit_suggestion():
     user, auth_error = _require_auth()
@@ -385,14 +496,18 @@ def deploy_current_project():
         return jsonify({'ok': False, 'error': 'Selected page HTML is empty.'}), 400
 
     netlify_token = os.getenv('NETLIFY_ACCESS_TOKEN', '').strip()
-    netlify_site_id = os.getenv('NETLIFY_SITE_ID', '').strip()
-    if not netlify_token or not netlify_site_id:
+    netlify_site_raw = os.getenv('NETLIFY_SITE_ID', '').strip()
+    if not netlify_token or not netlify_site_raw:
         return jsonify(
             {
                 'ok': False,
                 'error': 'Deploy is not configured. Set NETLIFY_ACCESS_TOKEN and NETLIFY_SITE_ID in server env.',
             }
         ), 500
+
+    netlify_site_id, site_error = _resolve_netlify_site_id(netlify_token, netlify_site_raw)
+    if not netlify_site_id:
+        return jsonify({'ok': False, 'error': site_error}), 400
 
     index_document = (
         '<!doctype html><html lang="en"><head><meta charset="UTF-8" />'

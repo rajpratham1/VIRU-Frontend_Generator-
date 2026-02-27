@@ -43,6 +43,8 @@ Set project root to `viru-frontend` in Vercel.
 - `VITE_FIREBASE_MESSAGING_SENDER_ID`
 - `VITE_FIREBASE_APP_ID`
 - `SECRET_KEY`
+- `NETLIFY_ACCESS_TOKEN` (for one-click deploy button)
+- `NETLIFY_SITE_ID` (for one-click deploy button)
 
 ## Notes
 
@@ -50,6 +52,17 @@ Set project root to `viru-frontend` in Vercel.
 - First FormSubmit email requires activation from receiver inbox.
 - Share links are currently in-memory on the Flask instance (not persistent).
 - Saved projects use Firebase Firestore collection `projects`.
+- One-click deploy button publishes current generated page to configured Netlify site.
+
+## One-Click Deploy Button Setup
+
+1. Create a Netlify Personal Access Token.
+2. Get Netlify Site ID (Site settings -> General -> Site details).
+3. Set these env vars in local `.env` and Vercel project env:
+   - `NETLIFY_ACCESS_TOKEN`
+   - `NETLIFY_SITE_ID`
+4. In `/app`, generate a page then click `Deploy Current Page`.
+5. VIRU returns live URL and copies it to clipboard.
 
 ## Firestore Rules (Minimum)
 

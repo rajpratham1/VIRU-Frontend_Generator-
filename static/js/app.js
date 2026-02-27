@@ -42,6 +42,8 @@ const shareStatusEl = document.getElementById('shareStatus');
 const deployNetlifyBtn = document.getElementById('deployNetlifyBtn');
 const deployVercelBtn = document.getElementById('deployVercelBtn');
 const deployGithubBtn = document.getElementById('deployGithubBtn');
+const deployNowBtn = document.getElementById('deployNowBtn');
+const deployedUrlEl = document.getElementById('deployedUrl');
 const deployStatusEl = document.getElementById('deployStatus');
 const logoutBtnEl = document.getElementById('logoutBtn');
 const recentListEl = document.getElementById('recentList');
@@ -489,6 +491,38 @@ async function loadSharedProjectIfPresent() {
 
 const openDeploy = (url, label) => { window.open(url, '_blank', 'noopener,noreferrer'); setDeployStatus(`Opened ${label}. Use exported ZIP to complete deployment.`); };
 
+async function deployCurrentPage() {
+  if (!state.result) {
+    setDeployStatus('Generate a website first, then deploy.', true);
+    return;
+  }
+
+  deployNowBtn.disabled = true;
+  setDeployStatus('Deploying current page...');
+
+  try {
+    const response = await fetch('/api/deploy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
+      body: JSON.stringify({ result: state.result, page_index: state.pageIndex }),
+    });
+    const data = await response.json();
+    if (!response.ok || !data.ok) throw new Error(data.error || 'Deploy failed.');
+
+    deployedUrlEl.value = data.deploy_url || '';
+    if (data.deploy_url) {
+      await navigator.clipboard.writeText(data.deploy_url).catch(() => {});
+      setDeployStatus(`Deploy successful. Live URL ready and copied.`);
+    } else {
+      setDeployStatus('Deploy completed but live URL was not returned.', true);
+    }
+  } catch (error) {
+    setDeployStatus(error.message || 'Deploy failed.', true);
+  } finally {
+    deployNowBtn.disabled = false;
+  }
+}
+
 async function submitSuggestion(event) {
   event.preventDefault();
   const name = document.getElementById('suggestName').value.trim();
@@ -558,6 +592,7 @@ createShareBtn.addEventListener('click', createShareLink);
 deployNetlifyBtn.addEventListener('click', () => openDeploy('https://app.netlify.com/drop', 'Netlify'));
 deployVercelBtn.addEventListener('click', () => openDeploy('https://vercel.com/new', 'Vercel'));
 deployGithubBtn.addEventListener('click', () => openDeploy('https://github.com/new', 'GitHub Pages'));
+deployNowBtn.addEventListener('click', deployCurrentPage);
 generateBtn.addEventListener('click', generateWebsite);
 healthBtn.addEventListener('click', runHealthCheck);
 settingsToggleEl.addEventListener('click', toggleSettingsDrawer);

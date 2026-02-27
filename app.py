@@ -5,6 +5,8 @@ import urllib.request
 import smtplib
 import re
 import uuid
+import io
+import zipfile
 from pathlib import Path
 from email.message import EmailMessage
 from threading import Lock
@@ -356,6 +358,78 @@ def submit_suggestion():
         return jsonify({'ok': True, 'message': 'Suggestion sent successfully.'})
     except Exception:
         return jsonify({'ok': False, 'error': 'Failed to send suggestion email. Check mail env settings.'}), 500
+
+
+@app.post('/api/deploy')
+def deploy_current_project():
+    user, auth_error = _require_auth()
+    if not user:
+        return jsonify({'ok': False, 'error': auth_error}), 401
+
+    payload = request.get_json(silent=True) or {}
+    result = payload.get('result') or {}
+    page_index = int(payload.get('page_index') or 0)
+
+    pages = result.get('pages') or []
+    if not pages:
+        return jsonify({'ok': False, 'error': 'No generated pages available to deploy.'}), 400
+    if page_index < 0 or page_index >= len(pages):
+        page_index = 0
+
+    page = pages[page_index] or {}
+    html = page.get('html') or ''
+    css = page.get('css') or ''
+    js = page.get('js') or ''
+
+    if not html.strip():
+        return jsonify({'ok': False, 'error': 'Selected page HTML is empty.'}), 400
+
+    netlify_token = os.getenv('NETLIFY_ACCESS_TOKEN', '').strip()
+    netlify_site_id = os.getenv('NETLIFY_SITE_ID', '').strip()
+    if not netlify_token or not netlify_site_id:
+        return jsonify(
+            {
+                'ok': False,
+                'error': 'Deploy is not configured. Set NETLIFY_ACCESS_TOKEN and NETLIFY_SITE_ID in server env.',
+            }
+        ), 500
+
+    index_document = (
+        '<!doctype html><html lang="en"><head><meta charset="UTF-8" />'
+        '<meta name="viewport" content="width=device-width, initial-scale=1.0" />'
+        '<link rel="stylesheet" href="./styles.css" /></head><body>'
+        f'{html}<script src="./script.js"></script></body></html>'
+    )
+
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr('index.html', index_document)
+        zf.writestr('styles.css', css)
+        zf.writestr('script.js', js)
+    zip_bytes = zip_buffer.getvalue()
+
+    deploy_url = f'https://api.netlify.com/api/v1/sites/{netlify_site_id}/deploys'
+    deploy_req = urllib.request.Request(deploy_url, data=zip_bytes, method='POST')
+    deploy_req.add_header('Authorization', f'Bearer {netlify_token}')
+    deploy_req.add_header('Content-Type', 'application/zip')
+
+    try:
+        with urllib.request.urlopen(deploy_req, timeout=45) as resp:
+            deploy_data = json.loads(resp.read().decode('utf-8'))
+    except urllib.error.HTTPError as exc:
+        try:
+            detail = exc.read().decode('utf-8')
+        except Exception:
+            detail = ''
+        return jsonify({'ok': False, 'error': f'Netlify deploy failed ({exc.code}). {detail[:180]}'}), 500
+    except Exception:
+        return jsonify({'ok': False, 'error': 'Netlify deploy request failed.'}), 500
+
+    live_url = deploy_data.get('ssl_url') or deploy_data.get('url') or ''
+    admin_url = deploy_data.get('admin_url') or ''
+    deploy_id = deploy_data.get('id') or ''
+
+    return jsonify({'ok': True, 'deploy_url': live_url, 'admin_url': admin_url, 'deploy_id': deploy_id})
 
 
 if __name__ == '__main__':

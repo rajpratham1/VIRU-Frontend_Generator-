@@ -86,6 +86,9 @@ def _extract_netlify_site_slug(raw_value: str) -> str:
     value = (raw_value or "").strip()
     if not value:
         return ""
+    # Team dashboard URL does not encode a specific site; caller must resolve via sites API.
+    if "app.netlify.com/teams/" in value and "/projects" in value:
+        return "__team_projects_url__"
     if re.fullmatch(r"[a-zA-Z0-9_-]{6,}", value):
         return value
     if "netlify.app" in value:
@@ -110,6 +113,17 @@ def _resolve_netlify_site_id(token: str, raw_value: str):
             sites = json.loads(resp.read().decode("utf-8"))
     except Exception:
         return "", "Unable to read Netlify sites list. Check NETLIFY_ACCESS_TOKEN permissions."
+
+    if site_slug == "__team_projects_url__":
+        if len(sites) == 1:
+            return str(sites[0].get("id") or ""), ""
+        if len(sites) > 1:
+            names = [str(s.get("name") or s.get("id") or "") for s in sites[:5]]
+            return "", (
+                "Team projects URL detected. Multiple sites found. "
+                f"Set NETLIFY_SITE_ID to one site name/id, for example: {', '.join(names)}"
+            )
+        return "", "No Netlify sites found for this token."
 
     for site in sites:
         candidates = {

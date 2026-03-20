@@ -17,6 +17,7 @@ from flask import Flask, jsonify, redirect, render_template, request, send_file,
 from services.document_converter import DocumentConverterService
 from services.generator import WebsiteGenerator
 from services.store import build_store
+from services.utils import get_writable_path
 
 BASE_DIR = Path(__file__).resolve().parent
 ENV_PATH = BASE_DIR / '.env'
@@ -33,7 +34,7 @@ AUTO_PORTFOLIO_PUBLIC_FILES = {
     'minimalist.png',
     'tech.png',
 }
-PORTFOLIO_PHOTO_DIR = BASE_DIR / 'data' / 'portfolio' / 'photos'
+PORTFOLIO_PHOTO_DIR = get_writable_path(BASE_DIR, 'data/portfolio/photos')
 PORTFOLIO_PREVIEW_TEMPLATES = {'classic', 'modern', 'creative', 'corporate', 'minimalist', 'tech'}
 
 

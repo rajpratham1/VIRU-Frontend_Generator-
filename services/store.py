@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from threading import Lock
 from typing import Any, Dict, List, Optional
+from .utils import is_vercel
 
 try:
     import firebase_admin
@@ -87,8 +88,7 @@ class JsonFileStore(BaseStore):
     mode = "json"
 
     def __init__(self, data_path: Path):
-        is_vercel = os.getenv("VERCEL") == "1"
-        if is_vercel:
+        if is_vercel():
             self.data_path = Path("/tmp") / "storage.json"
         else:
             self.data_path = data_path

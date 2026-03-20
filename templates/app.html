@@ -1,316 +1,343 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VIRU | Generator</title>
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
-    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-  </head>
-  <body>
-    <div class="bg-glow" aria-hidden="true"></div>
-    <div id="introOverlay" class="intro-overlay hidden" aria-hidden="true">
-      <div class="intro-card">
-        <div class="intro-media-wrap">
-          <video
-            id="introVideo"
-            class="intro-video"
-            autoplay
-            muted
-            playsinline
-            preload="auto"
-          >
-            <source src="{{ url_for('static', filename='images/demo.mp4') }}" type="video/mp4" />
-          </video>
-          <div class="intro-media-fallback">
-            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="VIRU logo" class="intro-fallback-logo" />
-            <p>Loading VIRU workspace experience...</p>
-          </div>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VIRU | Generator</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+</head>
+
+<body>
+  <div class="bg-glow" aria-hidden="true"></div>
+  <div id="introOverlay" class="intro-overlay hidden" aria-hidden="true">
+    <div class="intro-card">
+      <div class="intro-media-wrap">
+        <video id="introVideo" class="intro-video" autoplay muted playsinline preload="auto">
+          <source src="{{ url_for('static', filename='images/demo.mp4') }}" type="video/mp4" />
+        </video>
+        <div class="intro-media-fallback">
+          <img src="{{ url_for('static', filename='images/logo.png') }}" alt="VIRU logo" class="intro-fallback-logo" />
+          <p>Loading VIRU workspace experience...</p>
         </div>
-        <div class="intro-actions">
-          <p>Welcome to VIRU Workspace</p>
-          <button id="skipIntroBtn" type="button" class="ghost-btn">Skip Animation</button>
-        </div>
+      </div>
+      <div class="intro-actions">
+        <p>Welcome to VIRU Workspace</p>
+        <button id="skipIntroBtn" type="button" class="ghost-btn">Skip Animation</button>
       </div>
     </div>
+  </div>
 
-    <header class="site-header app-header">
-      <a href="/" class="brand-link" aria-label="VIRU home">
-        <div class="brand">
-          <img src="{{ url_for('static', filename='images/logo.png') }}" alt="VIRU logo" class="brand-logo" />
-          <div>
-            <p class="brand-kicker">AI Workspace</p>
-            <h1>VIRU Generator</h1>
-          </div>
+  <header class="site-header app-header">
+    <a href="/" class="brand-link" aria-label="VIRU home">
+      <div class="brand">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="VIRU logo" class="brand-logo" />
+        <div>
+          <p class="brand-kicker">AI Workspace</p>
+          <h1>VIRU Generator</h1>
         </div>
-      </a>
-      <div class="app-head-actions">
+      </div>
+    </a>
+    <div class="app-head-actions">
+      <button id="menuToggle" class="icon-btn menu-toggle" type="button" aria-label="Toggle menu">⋮</button>
+      <nav class="nav-actions" id="navActions">
         <a href="/generate" class="ghost-link">Portfolio</a>
         <a href="/converter" class="ghost-link">Converter</a>
+        <a href="https://automatic-mail-sender.vercel.app/" target="_blank" class="ghost-link">Auto Mail Sender</a>
         <a href="/conversions" class="ghost-link">My Conversions</a>
         <a href="/projects" class="ghost-link">My Work</a>
-        <button id="settingsToggle" class="icon-btn" type="button" aria-label="Open project settings">&#9881;</button>
+        <button id="settingsToggle" class="icon-btn" type="button" aria-label="Open Feedback">&#9881;</button>
         <button id="logoutBtn" class="ghost-btn" type="button">Logout</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <aside id="settingsDrawer" class="panel settings-drawer" aria-hidden="true">
+      <h3>Feedback</h3>
+      <p class="ai-tip">Open source project. Share improvements and feature ideas.</p>
+
+      <div class="founder-card">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Founder avatar"
+          class="founder-avatar-image" />
+        <div>
+          <p class="founder-label">Founder: Pratham Kumar</p>
+          <a class="founder-link" href="https://github.com/rajpratham1" target="_blank"
+            rel="noopener noreferrer">GitHub: github.com/rajpratham1</a>
+        </div>
       </div>
-    </header>
 
-    <main class="app-shell">
-      <aside id="settingsDrawer" class="panel settings-drawer" aria-hidden="true">
-        <h3>Project Settings</h3>
-        <p class="ai-tip">Open source project. Share improvements and feature ideas.</p>
+      <div class="open-source">
+        <p>Repository & Admin</p>
+        <a href="https://github.com/rajpratham1/VIRU-Frontend_Generator-" target="_blank"
+          rel="noopener noreferrer">github.com/rajpratham1/VIRU-Frontend_Generator-</a>
+        <a href="/admin/status" class="ghost-btn" style="display:block; margin-top:0.8rem; text-align:center;">System
+          Health Dashboard</a>
+      </div>
 
-        <div class="founder-card">
-          <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Founder avatar" class="founder-avatar-image" />
-          <div>
-            <p class="founder-label">Founder: Pratham Kumar</p>
-            <a class="founder-link" href="https://github.com/rajpratham1" target="_blank" rel="noopener noreferrer">GitHub: github.com/rajpratham1</a>
-          </div>
+      <form id="suggestForm" class="suggest-form" action="https://formsubmit.co/ajax/shrivastavapratham40@gmail.com"
+        method="POST">
+        <label for="suggestName">Your Name</label>
+        <input id="suggestName" name="name" type="text" required />
+
+        <label for="suggestEmail">Your Email</label>
+        <input id="suggestEmail" name="email" type="email" required />
+
+        <label for="suggestMessage">Suggestion</label>
+        <textarea id="suggestMessage" name="message" rows="4" required></textarea>
+
+        <input type="hidden" name="_subject" value="New VIRU Suggestion" />
+        <input type="hidden" name="_template" value="table" />
+        <input type="hidden" name="_captcha" value="false" />
+
+        <button type="submit" class="primary-btn">Send Suggestion</button>
+      </form>
+      <p id="suggestStatus" class="status" role="status" aria-live="polite"></p>
+    </aside>
+
+    <section class="app-main">
+      <section class="panel dashboard-panel">
+        <div class="dashboard-head">
+          <h3>Workspace Dashboard</h3>
+          <p id="authStatus">Authenticated workspace. <a href="/admin/status"
+              style="color: var(--brand); text-decoration: none; font-weight: 700; margin-left: 10px; font-size: 0.9rem;">[
+              System Health ⚡ ]</a></p>
         </div>
-
-        <div class="open-source">
-          <p>Repository</p>
-          <a href="https://github.com/rajpratham1/VIRU-Frontend_Generator-" target="_blank" rel="noopener noreferrer">github.com/rajpratham1/VIRU-Frontend_Generator-</a>
-        </div>
-
-        <form id="suggestForm" class="suggest-form" action="https://formsubmit.co/ajax/shrivastavapratham40@gmail.com" method="POST">
-          <label for="suggestName">Your Name</label>
-          <input id="suggestName" name="name" type="text" required />
-
-          <label for="suggestEmail">Your Email</label>
-          <input id="suggestEmail" name="email" type="email" required />
-
-          <label for="suggestMessage">Suggestion</label>
-          <textarea id="suggestMessage" name="message" rows="4" required></textarea>
-
-          <input type="hidden" name="_subject" value="New VIRU Suggestion" />
-          <input type="hidden" name="_template" value="table" />
-          <input type="hidden" name="_captcha" value="false" />
-
-          <button type="submit" class="primary-btn">Send Suggestion</button>
-        </form>
-        <p id="suggestStatus" class="status" role="status" aria-live="polite"></p>
-      </aside>
-
-      <section class="app-main">
-        <section class="panel dashboard-panel">
-          <div class="dashboard-head">
-            <h3>Workspace Dashboard</h3>
-            <p id="authStatus">Authenticated workspace.</p>
+        <div class="dashboard-grid">
+          <div class="dashboard-card">
+            <h4>Recent Generations</h4>
+            <ul id="recentList" class="recent-list"></ul>
           </div>
-          <div class="dashboard-grid">
-            <div class="dashboard-card">
-              <h4>Recent Generations</h4>
-              <ul id="recentList" class="recent-list"></ul>
-            </div>
-            <div class="dashboard-card">
-              <h4>Usage Snapshot</h4>
-              <div class="metric-row">
-                <div>
-                  <p class="metric-label">Total</p>
-                  <p id="totalGenerations" class="metric-value">0</p>
-                </div>
-                <div>
-                  <p class="metric-label">Avg Latency</p>
-                  <p id="avgLatency" class="metric-value">0 ms</p>
-                </div>
-                <div>
-                  <p class="metric-label">Last Quality</p>
-                  <p id="lastQuality" class="metric-value">--</p>
-                </div>
+          <div class="dashboard-card">
+            <h4>Usage Snapshot</h4>
+            <div class="metric-row">
+              <div>
+                <p class="metric-label">Total</p>
+                <p id="totalGenerations" class="metric-value">0</p>
+              </div>
+              <div>
+                <p class="metric-label">Avg Latency</p>
+                <p id="avgLatency" class="metric-value">0 ms</p>
+              </div>
+              <div>
+                <p class="metric-label">Last Quality</p>
+                <p id="lastQuality" class="metric-value">--</p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="mobile-tab-switcher" role="tablist" aria-label="Generator sections">
+        <button class="mobile-tab active" data-view="prompt" type="button">Prompt</button>
+        <button class="mobile-tab" data-view="output" type="button">Output</button>
+        <button class="mobile-tab" data-view="logs" type="button">Logs</button>
+      </div>
+
+      <section class="app-grid">
+        <section id="promptPanel" class="panel controls-panel view-active">
+          <h2>Build Request</h2>
+          <p class="ai-tip">Describe audience, tone, required sections, and CTA.</p>
+
+          <div class="prompt-templates">
+            <button type="button" class="template-btn" data-template="saas">SaaS Launch</button>
+            <button type="button" class="template-btn" data-template="portfolio">Portfolio</button>
+            <button type="button" class="template-btn" data-template="ecommerce">Ecommerce</button>
+          </div>
+          <div class="feature-block">
+            <h4>Template Library</h4>
+            <div id="templateCategories" class="category-row">
+              <button type="button" class="chip-btn active" data-category="all">All</button>
+              <button type="button" class="chip-btn" data-category="saas">SaaS</button>
+              <button type="button" class="chip-btn" data-category="portfolio">Portfolio</button>
+              <button type="button" class="chip-btn" data-category="ecommerce">Ecommerce</button>
+              <button type="button" class="chip-btn" data-category="agency">Agency</button>
+            </div>
+            <div id="templateLibrary" class="template-library"></div>
+          </div>
+
+          <label for="prompt">Prompt</label>
+          <textarea id="prompt" rows="7"
+            placeholder="Example: Build a modern SaaS page for AI interview prep with pricing, testimonials, FAQ, and CTA."></textarea>
+          <div class="prompt-hints" id="promptHints">Prompt quality: add audience, tone, sections, and CTA.</div>
+          <div class="inline-actions">
+            <label class="toggle-wrap" for="autoAssistMode">
+              <input id="autoAssistMode" type="checkbox" checked />
+              <span>Auto Prompt Assistant</span>
+            </label>
+            <button id="enhancePromptBtn" class="ghost-btn" type="button">Enhance Prompt</button>
+          </div>
+
+          <div class="feature-block">
+            <h4>Clone From URL</h4>
+            <div class="inline-actions">
+              <input id="cloneUrl" type="url" placeholder="https://example.com" />
+              <button id="pasteUrlBtn" class="ghost-btn" type="button">Paste URL</button>
+              <button id="analyzeUrlBtn" class="ghost-btn" type="button">Analyze & Remix</button>
+            </div>
+            <p id="cloneStatus" class="status"></p>
+          </div>
+
+          <div class="row-2 flexible-row">
+            <div>
+              <label for="style">Style</label>
+              <select id="style">
+                <option value="modern saas">Modern SaaS</option>
+                <option value="editorial bold">Editorial Bold</option>
+                <option value="clean fintech">Clean Fintech</option>
+                <option value="playful startup">Playful Startup</option>
+              </select>
+            </div>
+            <div>
+              <label for="pages">Pages</label>
+              <input id="pages" type="number" min="1" max="5" value="1" />
+            </div>
+          </div>
+
+          <div class="row-2 flexible-row">
+            <div>
+              <label for="qualityPreset">Quality Preset</label>
+              <select id="qualityPreset">
+                <option value="fast">Fast</option>
+                <option value="balanced" selected>Balanced</option>
+                <option value="premium">Premium</option>
+              </select>
+            </div>
+            <div class="toggle-col">
+              <label class="toggle-wrap" for="strictMode">
+                <input id="strictMode" type="checkbox" checked />
+                <span>Strict AI</span>
+              </label>
+              <label class="toggle-wrap" for="rewriteMode">
+                <input id="rewriteMode" type="checkbox" checked />
+                <span>Rewrite Seed</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="top-actions">
+            <button id="healthBtn" class="ghost-btn" type="button">Provider Health Check</button>
+            <button id="generateBtn" class="primary-btn" type="button">Generate Website</button>
+          </div>
+          <div class="queue-box">
+            <div id="queueBadge" class="queue-badge">Queue: idle</div>
+            <div class="queue-track">
+              <div id="queueFill" class="queue-fill"></div>
+            </div>
+          </div>
+          <p id="status" class="status" role="status" aria-live="polite"></p>
+        </section>
+
+        <section id="outputPanel" class="panel output-panel">
+          <div class="output-header">
+            <h2 id="outputTitle">Generated Output</h2>
+            <p id="outputSource" class="chip">No output yet</p>
+          </div>
+
+          <div class="quality-panel">
+            <div>
+              <p class="metric-label">Quality Score</p>
+              <p id="qualityScore" class="metric-value">--</p>
+            </div>
+            <div>
+              <p class="metric-label">Validation</p>
+              <p id="validationSummary" class="metric-value">--</p>
+            </div>
+            <div>
+              <p class="metric-label">Latency</p>
+              <p id="latencySummary" class="metric-value">--</p>
+            </div>
+          </div>
+
+          <div id="pageTabs" class="tabs"></div>
+
+          <div class="code-actions">
+            <button data-code="html" class="code-tab active" type="button">HTML</button>
+            <button data-code="css" class="code-tab" type="button">CSS</button>
+            <button data-code="js" class="code-tab" type="button">JS</button>
+            <button id="combinedBtn" class="ghost-btn" type="button">Combined HTML</button>
+            <button id="copyBtn" class="ghost-btn" type="button">Copy Current Code</button>
+            <button id="downloadBtn" class="ghost-btn" type="button">Download HTML</button>
+            <button id="exportZipBtn" class="ghost-btn" type="button">Export ZIP</button>
+            <button id="exportReactBtn" class="ghost-btn" type="button">Export React Starter</button>
+            <button id="exportNextBtn" class="ghost-btn" type="button">Export Next Starter</button>
+          </div>
+
+          <pre id="codeView" class="code-view"></pre>
+
+          <h3>Live Preview</h3>
+          <iframe id="preview" title="Generated webpage preview"></iframe>
+
+          <div class="feature-block">
+            <h4>Team Mode</h4>
+            <div class="inline-actions">
+              <select id="sharePermission">
+                <option value="view">View Only</option>
+                <option value="edit">Edit Access</option>
+              </select>
+              <button id="createShareBtn" class="ghost-btn" type="button">Create Share Link</button>
+            </div>
+            <input id="shareLink" type="text" readonly placeholder="Primary share link appears here" />
+            <input id="publicShareLink" type="text" readonly placeholder="Public website link appears here" />
+            <input id="editShareLink" type="text" readonly placeholder="Editor link appears here" />
+            <p id="shareStatus" class="status"></p>
+          </div>
+
+          <div class="feature-block">
+            <h4>Deploy Connectors</h4>
+            <div class="deploy-grid">
+              <button id="deployNowBtn" class="primary-btn" type="button">Publish Live URL</button>
+              <button id="deployNetlifyBtn" class="ghost-btn" type="button">Netlify</button>
+              <button id="deployVercelBtn" class="ghost-btn" type="button">Vercel</button>
+              <button id="deployGithubBtn" class="ghost-btn" type="button">GitHub Pages</button>
+            </div>
+            <input id="deployedUrl" type="text" readonly placeholder="Live deployed URL will appear here" />
+            <p id="deployStatus" class="status"></p>
           </div>
         </section>
 
-        <div class="mobile-tab-switcher" role="tablist" aria-label="Generator sections">
-          <button class="mobile-tab active" data-view="prompt" type="button">Prompt</button>
-          <button class="mobile-tab" data-view="output" type="button">Output</button>
-          <button class="mobile-tab" data-view="logs" type="button">Logs</button>
-        </div>
-
-        <section class="app-grid">
-          <section id="promptPanel" class="panel controls-panel view-active">
-            <h2>Build Request</h2>
-            <p class="ai-tip">Describe audience, tone, required sections, and CTA.</p>
-
-            <div class="prompt-templates">
-              <button type="button" class="template-btn" data-template="saas">SaaS Launch</button>
-              <button type="button" class="template-btn" data-template="portfolio">Portfolio</button>
-              <button type="button" class="template-btn" data-template="ecommerce">Ecommerce</button>
-            </div>
-            <div class="feature-block">
-              <h4>Template Library</h4>
-              <div id="templateCategories" class="category-row">
-                <button type="button" class="chip-btn active" data-category="all">All</button>
-                <button type="button" class="chip-btn" data-category="saas">SaaS</button>
-                <button type="button" class="chip-btn" data-category="portfolio">Portfolio</button>
-                <button type="button" class="chip-btn" data-category="ecommerce">Ecommerce</button>
-                <button type="button" class="chip-btn" data-category="agency">Agency</button>
-              </div>
-              <div id="templateLibrary" class="template-library"></div>
-            </div>
-
-            <label for="prompt">Prompt</label>
-            <textarea id="prompt" rows="7" placeholder="Example: Build a modern SaaS page for AI interview prep with pricing, testimonials, FAQ, and CTA."></textarea>
-            <div class="prompt-hints" id="promptHints">Prompt quality: add audience, tone, sections, and CTA.</div>
-            <div class="inline-actions">
-              <label class="toggle-wrap" for="autoAssistMode">
-                <input id="autoAssistMode" type="checkbox" checked />
-                <span>Auto Prompt Assistant</span>
-              </label>
-              <button id="enhancePromptBtn" class="ghost-btn" type="button">Enhance Prompt</button>
-            </div>
-
-            <div class="feature-block">
-              <h4>Clone From URL</h4>
-              <div class="inline-actions">
-                <input id="cloneUrl" type="url" placeholder="https://example.com" />
-                <button id="pasteUrlBtn" class="ghost-btn" type="button">Paste URL</button>
-                <button id="analyzeUrlBtn" class="ghost-btn" type="button">Analyze & Remix</button>
-              </div>
-              <p id="cloneStatus" class="status"></p>
-            </div>
-
-            <div class="row-2 flexible-row">
-              <div>
-                <label for="style">Style</label>
-                <select id="style">
-                  <option value="modern saas">Modern SaaS</option>
-                  <option value="editorial bold">Editorial Bold</option>
-                  <option value="clean fintech">Clean Fintech</option>
-                  <option value="playful startup">Playful Startup</option>
-                </select>
-              </div>
-              <div>
-                <label for="pages">Pages</label>
-                <input id="pages" type="number" min="1" max="5" value="1" />
-              </div>
-            </div>
-
-            <div class="row-2 flexible-row">
-              <div>
-                <label for="qualityPreset">Quality Preset</label>
-                <select id="qualityPreset">
-                  <option value="fast">Fast</option>
-                  <option value="balanced" selected>Balanced</option>
-                  <option value="premium">Premium</option>
-                </select>
-              </div>
-              <div class="toggle-col">
-                <label class="toggle-wrap" for="strictMode">
-                  <input id="strictMode" type="checkbox" checked />
-                  <span>Strict AI</span>
-                </label>
-                <label class="toggle-wrap" for="rewriteMode">
-                  <input id="rewriteMode" type="checkbox" checked />
-                  <span>Rewrite Seed</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="top-actions">
-              <button id="healthBtn" class="ghost-btn" type="button">Provider Health Check</button>
-              <button id="generateBtn" class="primary-btn" type="button">Generate Website</button>
-            </div>
-            <div class="queue-box">
-              <div id="queueBadge" class="queue-badge">Queue: idle</div>
-              <div class="queue-track"><div id="queueFill" class="queue-fill"></div></div>
-            </div>
-            <p id="status" class="status" role="status" aria-live="polite"></p>
-          </section>
-
-          <section id="outputPanel" class="panel output-panel">
-            <div class="output-header">
-              <h2 id="outputTitle">Generated Output</h2>
-              <p id="outputSource" class="chip">No output yet</p>
-            </div>
-
-            <div class="quality-panel">
-              <div>
-                <p class="metric-label">Quality Score</p>
-                <p id="qualityScore" class="metric-value">--</p>
-              </div>
-              <div>
-                <p class="metric-label">Validation</p>
-                <p id="validationSummary" class="metric-value">--</p>
-              </div>
-              <div>
-                <p class="metric-label">Latency</p>
-                <p id="latencySummary" class="metric-value">--</p>
-              </div>
-            </div>
-
-            <div id="pageTabs" class="tabs"></div>
-
-            <div class="code-actions">
-              <button data-code="html" class="code-tab active" type="button">HTML</button>
-              <button data-code="css" class="code-tab" type="button">CSS</button>
-              <button data-code="js" class="code-tab" type="button">JS</button>
-              <button id="combinedBtn" class="ghost-btn" type="button">Combined HTML</button>
-              <button id="copyBtn" class="ghost-btn" type="button">Copy Current Code</button>
-              <button id="downloadBtn" class="ghost-btn" type="button">Download HTML</button>
-              <button id="exportZipBtn" class="ghost-btn" type="button">Export ZIP</button>
-              <button id="exportReactBtn" class="ghost-btn" type="button">Export React Starter</button>
-              <button id="exportNextBtn" class="ghost-btn" type="button">Export Next Starter</button>
-            </div>
-
-            <pre id="codeView" class="code-view"></pre>
-
-            <h3>Live Preview</h3>
-            <iframe id="preview" title="Generated webpage preview"></iframe>
-
-            <div class="feature-block">
-              <h4>Team Mode</h4>
-              <div class="inline-actions">
-                <select id="sharePermission">
-                  <option value="view">View Only</option>
-                  <option value="edit">Edit Access</option>
-                </select>
-                <button id="createShareBtn" class="ghost-btn" type="button">Create Share Link</button>
-              </div>
-              <input id="shareLink" type="text" readonly placeholder="Primary share link appears here" />
-              <input id="publicShareLink" type="text" readonly placeholder="Public website link appears here" />
-              <input id="editShareLink" type="text" readonly placeholder="Editor link appears here" />
-              <p id="shareStatus" class="status"></p>
-            </div>
-
-            <div class="feature-block">
-              <h4>Deploy Connectors</h4>
-              <div class="deploy-grid">
-                <button id="deployNowBtn" class="primary-btn" type="button">Publish Live URL</button>
-                <button id="deployNetlifyBtn" class="ghost-btn" type="button">Netlify</button>
-                <button id="deployVercelBtn" class="ghost-btn" type="button">Vercel</button>
-                <button id="deployGithubBtn" class="ghost-btn" type="button">GitHub Pages</button>
-              </div>
-              <input id="deployedUrl" type="text" readonly placeholder="Live deployed URL will appear here" />
-              <p id="deployStatus" class="status"></p>
-            </div>
-          </section>
-
-          <section id="logsPanel" class="panel logs-panel">
-            <h3>Generation Logs</h3>
-            <pre id="logsView" class="logs-view">No logs yet.</pre>
-          </section>
+        <section id="logsPanel" class="panel logs-panel">
+          <h3>Generation Logs</h3>
+          <pre id="logsView" class="logs-view">No logs yet.</pre>
         </section>
       </section>
-    </main>
+    </section>
+  </main>
 
-    <footer class="site-footer">
-      <div>
-        <h4>More Tools</h4>
-        <p>Use the AI Document Converter for upload, OCR-ready preparation, format mapping, and document workflow planning.</p>
-      </div>
-      <div>
-        <h4>Open Converter</h4>
-        <a href="/converter">Go to Document Converter</a>
-        <a href="/conversions">Open My Conversions</a>
-      </div>
-    </footer>
+  <footer class="site-footer premium-footer">
+    <div class="footer-bottom">
+      <p>&copy; 2026 VIRU Frontend Generator. All rights reserved.</p>
+    </div>
 
-    <script type="module" src="{{ url_for('static', filename='js/app.js') }}"></script>
-  </body>
+    <div class="footer-grid">
+      <a class="developer-card" href="https://github.com/rajpratham1" target="_blank" rel="noreferrer">
+        <img src="https://github.com/rajpratham1.png" alt="Pratham Kumar GitHub profile photo" class="developer-avatar">
+        <div class="developer-copy">
+          <strong>Pratham Kumar</strong>
+          <span>@rajpratham1</span>
+          <p>B.Tech CSE student, web developer, and active builder. Linked to the public GitHub profile.</p>
+        </div>
+      </a>
+
+      <div class="footer-links-section">
+        <nav class="footer-nav">
+          <a href="https://automatic-mail-sender.vercel.app/" target="_blank">Auto Mail Sender</a>
+          <a href="/converter">Document Converter</a>
+          <a href="https://github.com/rajpratham1/VIRU-Frontend_Generator-" target="_blank">VIRU Repository</a>
+          <a href="/auth">Workspace Login</a>
+        </nav>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+
 </html>

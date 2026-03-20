@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from email.message import EmailMessage
 from dotenv import load_dotenv
+import sys
 from flask import Flask, jsonify, redirect, render_template, request, send_file, send_from_directory, url_for
 
 from services.document_converter import DocumentConverterService
@@ -296,6 +297,16 @@ def conversions_page():
 @app.get('/admin/converter')
 def admin_converter_page():
     return render_template('admin_converter.html')
+
+
+@app.get('/admin/status')
+def admin_status_page():
+    user, auth_error = _require_auth()
+    if not user:
+        return redirect('/auth?next=/admin/status')
+    if not _is_admin(user):
+        return 'Admin access required.', 403
+    return render_template('admin_status.html', sys_info=sys.version_info)
 
 
 @app.get('/share/<share_id>')
@@ -593,13 +604,16 @@ def health():
         return jsonify({'ok': False, 'message': auth_error}), 401
 
     try:
+        from services.utils import is_vercel
         generator = _fresh_generator()
         response = generator.health_check()
         response['auth'] = {'email': user.get('email', ''), 'uid': user.get('localId', '')}
         response['persistence_mode'] = DATA_STORE.mode
+        response['is_vercel'] = is_vercel()
+        response['timestamp'] = _utc_now_iso()
         return jsonify(response)
-    except Exception:
-        return jsonify({'ok': False, 'message': 'Health check failed unexpectedly.'}), 500
+    except Exception as exc:
+        return jsonify({'ok': False, 'message': f'Health check failed: {str(exc)}'}), 500
 
 
 @app.post('/api/converter/upload')

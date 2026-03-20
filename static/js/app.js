@@ -70,6 +70,8 @@ const introOverlayEl = document.getElementById('introOverlay');
 const skipIntroBtnEl = document.getElementById('skipIntroBtn');
 const introVideoEl = document.getElementById('introVideo');
 const introMediaWrapEl = document.querySelector('.intro-media-wrap');
+const menuToggleEl = document.getElementById('menuToggle');
+const appHeaderEl = document.querySelector('.app-header');
 
 const TEMPLATE_LIBRARY = [
   { id: 'saas-pricing', category: 'saas', title: 'SaaS Pricing Funnel', style: 'modern saas', pages: 1, prompt: 'Build a SaaS landing page with hero, feature grid, pricing tiers, FAQ, testimonials, and final CTA.' },
@@ -278,12 +280,19 @@ async function runHealthCheck() {
   setStatus('Checking provider health...');
   try {
     const response = await fetch('/api/health', { headers: await authHeaders() });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Health check failed with status ${response.status}`);
+    }
     const data = await response.json();
-    if (!response.ok) throw new Error(data.message || 'Health check failed');
     renderLogs({ health: data });
-    setStatus(data.ok ? `Health check passed. Provider=${data.provider}, Model=${data.model}` : `Health check failed: ${data.message}`, !data.ok);
+    const statusMsg = data.ok
+      ? `Health OK: ${data.provider} (${data.model})`
+      : `Issues detected: ${data.message}`;
+    setStatus(statusMsg, !data.ok);
   } catch (error) {
-    setStatus(error.message || 'Health check failed.', true);
+    console.error('[Health Check Error]', error);
+    setStatus(`System inaccessible: ${error.message}`, true);
   } finally {
     healthBtn.disabled = false;
   }
@@ -424,23 +433,28 @@ async function generateWebsite() {
         body: JSON.stringify({ prompt, style: styleEl.value, pages: Number(pagesEl.value || 1), quality_preset: qualityPresetEl.value, strict_mode: strictModeEl.checked, rewrite_mode: rewriteModeEl.checked }),
       });
       const data = await response.json();
-      if (!response.ok || data.ok === false) throw new Error(data.error || 'Generation failed');
+      if (!response.ok || data.ok === false) throw new Error(data.error || `Generation failed with status ${response.status}`);
       applyResult(data);
       updateQueue('done');
-      setStatus('Website generated successfully.');
+      setStatus('Success! Website generated.');
       saveRecentGeneration({ title: data.title || 'Generated Output', summary: (data.summary || '').slice(0, 120), latency: data.logs?.latency_ms || 0, quality: qualityScoreEl.textContent });
       await saveProjectToCloud(data, prompt);
-      if (state.shareMode === 'edit' && state.shareId) {
+      if (state.shareId && state.shareMode === 'edit') {
         await saveSharedWorkspace(data, prompt);
-        setShareStatus(`Shared editor updated${state.shareOwner ? ` for ${state.shareOwner}` : ''}.`);
+        setShareStatus(`Shared workspace updated.`);
       }
       generateBtn.disabled = false;
       return;
     } catch (error) {
+      console.error(`[Generation Attempt ${attempt + 1} Error]`, error);
       attempt += 1;
-      if (attempt >= 2) { updateQueue('done'); setStatus(error.message || 'Generation failed.', true); break; }
+      if (attempt >= 2) {
+        updateQueue('done');
+        setStatus(`Error: ${error.message}`, true);
+        break;
+      }
       setStatus('Retrying generation...');
-      renderLogs({ retry: attempt, message: error.message || 'Retrying' });
+      renderLogs({ retry: attempt, message: error.message });
     }
   }
   generateBtn.disabled = false;
@@ -676,6 +690,18 @@ deployNowBtn.addEventListener('click', deployCurrentPage);
 generateBtn.addEventListener('click', generateWebsite);
 healthBtn.addEventListener('click', runHealthCheck);
 settingsToggleEl.addEventListener('click', toggleSettingsDrawer);
+
+if (menuToggleEl && appHeaderEl) {
+  menuToggleEl.addEventListener('click', (e) => {
+    e.stopPropagation();
+    appHeaderEl.classList.toggle('menu-open');
+  });
+  document.addEventListener('click', (e) => {
+    if (!appHeaderEl.contains(e.target) && appHeaderEl.classList.contains('menu-open')) {
+      appHeaderEl.classList.remove('menu-open');
+    }
+  });
+}
 suggestFormEl.addEventListener('submit', submitSuggestion);
 analyzeUrlBtn.addEventListener('click', analyzeUrl);
 pasteUrlBtn?.addEventListener('click', pasteCloneUrl);

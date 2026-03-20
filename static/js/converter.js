@@ -195,13 +195,14 @@ async function uploadFiles(files) {
       body: formData,
     });
     const data = await response.json();
-    if (!response.ok || !data.ok) throw new Error(data.error || 'Upload failed.');
+    if (!response.ok || !data.ok) throw new Error(data.error || `Upload failed with status ${response.status}`);
     state.uploads = data.uploads || [];
     renderUploads();
-    await selectUpload(state.uploads[0]);
-    setUploadStatus(`${state.uploads.length} file(s) uploaded successfully.`);
+    if (state.uploads.length > 0) await selectUpload(state.uploads[0]);
+    setUploadStatus(`${state.uploads.length} file(s) processed. Choose format below.`);
   } catch (error) {
-    setUploadStatus(error.message || 'Upload failed.', true);
+    console.error('[Upload Error]', error);
+    setUploadStatus(`Error: ${error.message}`, true);
   }
 }
 
@@ -295,14 +296,15 @@ async function convertActiveUpload() {
       body: JSON.stringify(payload),
     });
     const data = await response.json();
-    if (!response.ok || !data.ok) throw new Error(data.error || 'Conversion failed.');
+    if (!response.ok || !data.ok) throw new Error(data.error || `Conversion failed (${response.status})`);
     state.lastJob = data.job;
-    await showPreview(data.job.preview);
-    setJobStatus(`Conversion completed: ${data.job.sourceFormat.toUpperCase()} -> ${data.job.targetFormat.toUpperCase()}`);
+    if (data.job?.preview) await showPreview(data.job.preview);
+    setJobStatus(`Success! ${data.job.sourceFormat.toUpperCase()} converted to ${data.job.targetFormat.toUpperCase()}.`);
     await loadJobs();
     if (state.isAdmin) await loadAdminMetrics();
   } catch (error) {
-    setJobStatus(error.message || 'Conversion failed.', true);
+    console.error('[Conversion Error]', error);
+    setJobStatus(`Failed: ${error.message}`, true);
   } finally {
     prepareBtnEl.disabled = false;
   }

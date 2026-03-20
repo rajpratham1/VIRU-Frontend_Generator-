@@ -87,7 +87,7 @@ class JsonFileStore(BaseStore):
     mode = "json"
 
     def __init__(self, data_path: Path):
-        is_vercel = os.getenv("VERCEL", "").strip().lower() == "true"
+        is_vercel = os.getenv("VERCEL") == "1"
         if is_vercel:
             self.data_path = Path("/tmp") / "storage.json"
         else:

@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from threading import Lock
 from typing import Any, Dict, List, Optional, Tuple
+from .utils import is_vercel
 
 import fitz
 import pytesseract
@@ -39,7 +40,10 @@ class DocumentConverterService:
     def __init__(self, base_dir: Path, store):
         self.base_dir = base_dir
         self.store = store
-        self.data_dir = base_dir / "data" / "converter"
+        if is_vercel():
+            self.data_dir = Path("/tmp") / "converter"
+        else:
+            self.data_dir = base_dir / "data" / "converter"
         self.uploads_dir = self.data_dir / "uploads"
         self.outputs_dir = self.data_dir / "outputs"
         self.previews_dir = self.data_dir / "previews"

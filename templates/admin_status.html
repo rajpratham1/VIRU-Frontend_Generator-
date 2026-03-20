@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Status | VIRU Workspace</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Manrope:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        .indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .online { background-color: var(--brand); box-shadow: 0 0 10px var(--brand); }
+        .offline { background-color: #ff4d4d; box-shadow: 0 0 10px #ff4d4d; }
+        .warning { background-color: #ffcc00; box-shadow: 0 0 10px #ffcc00; }
+        
+        .raw-data {
+            font-family: monospace;
+            font-size: 0.8rem;
+            background: rgba(0,0,0,0.3);
+            padding: 1rem;
+            border-radius: 10px;
+            overflow: auto;
+            max-height: 200px;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-glow">
+    <header class="site-header">
+        <a href="/" class="brand-link">
+            <div class="brand">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="VIRU" class="brand-logo">
+                <div>
+                    <p class="brand-kicker">Admin Center</p>
+                    <h1>System Status</h1>
+                </div>
+            </div>
+        </a>
+        <div class="app-head-actions">
+            <a href="/app" class="ghost-link">Back to App</a>
+        </div>
+    </header>
+
+    <main class="app-shell">
+        <div class="status-grid">
+            <!-- Environment Panel -->
+            <section class="panel">
+                <h3>Environment</h3>
+                <div class="status-content">
+                    <div class="status-item">
+                        <span>Platform</span>
+                        <span id="platform-val">Loading...</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Runtime</span>
+                        <span>Python {{ "{}.{}.{}".format(sys_info.major, sys_info.minor, sys_info.micro) if sys_info else "Unknown" }}</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Persistence</span>
+                        <span id="persistence-val">Loading...</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Provider Health -->
+            <section class="panel">
+                <h3>AI Providers</h3>
+                <div class="status-content">
+                    <div class="status-item">
+                        <span>Primary Generator</span>
+                        <div id="gen-status">
+                            <span class="indicator warning"></span>
+                            <span id="gen-provider">Checking...</span>
+                        </div>
+                    </div>
+                    <div class="status-item">
+                        <span>OCR Engine</span>
+                        <div id="ocr-status">
+                            <span class="indicator warning"></span>
+                            <span id="ocr-provider">Checking...</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- API Status -->
+            <section class="panel">
+                <h3>API Configuration</h3>
+                <div class="status-content" id="api-config-list">
+                    <!-- Dynamic API status -->
+                </div>
+            </section>
+        </div>
+
+        <section class="panel" style="margin-top: 2rem;">
+            <h3>Diagnostics</h3>
+            <p class="muted">Live system response from <code>/api/health</code></p>
+            <div id="raw-log" class="raw-data">Loading diagnostics...</div>
+            <div style="margin-top: 1rem;">
+                <button onclick="refreshStatus()" class="primary-link">Refresh Diagnostics</button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        async function refreshStatus() {
+            const rawLog = document.getElementById('raw-log');
+            rawLog.textContent = 'Fetching current health metrics...';
+            
+            try {
+                const resp = await fetch('/api/health');
+                const data = await resp.json();
+                
+                rawLog.textContent = JSON.stringify(data, null, 2);
+                
+                // Update Environment
+                document.getElementById('platform-val').textContent = data.is_vercel ? 'Vercel Serverless' : 'Local Host';
+                document.getElementById('persistence-val').textContent = data.persistence_mode || 'Unknown';
+                
+                // Update Generator
+                const genStatus = document.getElementById('gen-status');
+                const genProv = document.getElementById('gen-provider');
+                genProv.textContent = data.provider || 'N/A';
+                genStatus.querySelector('.indicator').className = data.ok ? 'indicator online' : 'indicator offline';
+                
+                // Update OCR
+                const ocrStatus = document.getElementById('ocr-status');
+                const ocrProv = document.getElementById('ocr-provider');
+                ocrProv.textContent = 'Groq (Vision)'; // Currently hardcoded in backend services
+                ocrStatus.querySelector('.indicator').className = data.ok ? 'indicator online' : 'indicator offline';
+
+                // Update API List
+                const apiList = document.getElementById('api-config-list');
+                apiList.innerHTML = '';
+                
+                const configs = [
+                    { name: 'OpenAI API', ok: data.sdk_available && data.key_present },
+                    { name: 'Firebase SDK', ok: data.persistence_mode === 'firestore' },
+                    { name: 'Vercel Runtime', ok: data.is_vercel }
+                ];
+
+                configs.forEach(c => {
+                    const item = document.createElement('div');
+                    item.className = 'status-item';
+                    item.innerHTML = `<span>${c.name}</span><span><span class="indicator ${c.ok ? 'online' : 'offline'}"></span>${c.ok ? 'Configured' : 'Missing'}</span>`;
+                    apiList.appendChild(item);
+                });
+
+            } catch (err) {
+                rawLog.textContent = 'Failure connecting to health API: ' + err.message;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', refreshStatus);
+    </script>
+    <footer class="site-footer premium-footer">
+      <div class="footer-bottom">
+        <p>&copy; 2026 VIRU Frontend Generator. All rights reserved.</p>
+      </div>
+
+      <div class="footer-grid">
+        <a class="developer-card" href="https://github.com/rajpratham1" target="_blank" rel="noreferrer">
+          <img src="https://github.com/rajpratham1.png" alt="Pratham Kumar GitHub profile photo" class="developer-avatar">
+          <div class="developer-copy">
+            <strong>Pratham Kumar</strong>
+            <span>@rajpratham1</span>
+            <p>B.Tech CSE student, web developer, and active builder. Linked to the public GitHub profile.</p>
+          </div>
+        </a>
+
+        <div class="footer-links-section">
+          <nav class="footer-nav">
+            <a href="https://automatic-mail-sender.vercel.app/" target="_blank">Auto Mail Sender</a>
+            <a href="/converter">Document Converter</a>
+            <a href="https://github.com/rajpratham1/VIRU-Frontend_Generator-" target="_blank">VIRU Repository</a>
+            <a href="/auth">Workspace Login</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+</html>

@@ -1,294 +1,304 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VIRU Frontend Generator</title>
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
-  </head>
-  <body>
-    <div class="bg-glow" aria-hidden="true"></div>
 
-    <header class="site-header">
-      <div class="brand">
-        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="VIRU logo" class="brand-logo" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VIRU Frontend Generator</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+</head>
+
+<body>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="brand">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="VIRU logo" class="brand-logo" />
+      <div>
+        <p class="brand-kicker">AI Frontend Engineer</p>
+        <h1>VIRU Website Generator</h1>
+      </div>
+    </div>
+    <p class="brand-note">Generate complete websites with prompt intelligence, quality validation, and
+      production-focused output.</p>
+  </header>
+
+  <main class="landing-shell">
+    <section class="panel hero-panel">
+      <p class="hero-badge">Prompt-to-Production</p>
+      <h2>Build landing pages, product sites, and portfolio experiences in minutes.</h2>
+      <p>
+        VIRU transforms your idea into complete `HTML`, `CSS`, and `JS` with responsive layouts, clear structure,
+        and realistic conversion copy. Use quality presets, strict validation, and live diagnostics to control output
+        quality.
+      </p>
+      <div class="hero-cta-row">
+        <a href="#authPanel" class="primary-link">Start with Login</a>
+        <a href="#workspace" class="ghost-link">Go to Generator</a>
+      </div>
+      <div class="hero-steps">
         <div>
-          <p class="brand-kicker">AI Frontend Engineer</p>
-          <h1>VIRU Website Generator</h1>
+          <span class="step-index">01</span>
+          <h4>Describe the product</h4>
+          <p>Audience, tone, conversion goal, and pages.</p>
+        </div>
+        <div>
+          <span class="step-index">02</span>
+          <h4>Generate with AI</h4>
+          <p>VIRU enhances prompts and validates output.</p>
+        </div>
+        <div>
+          <span class="step-index">03</span>
+          <h4>Ship faster</h4>
+          <p>Copy HTML/CSS/JS or download single file.</p>
         </div>
       </div>
-      <p class="brand-note">Generate complete websites with prompt intelligence, quality validation, and production-focused output.</p>
-    </header>
+    </section>
 
-    <main class="landing-shell">
-      <section class="panel hero-panel">
-        <p class="hero-badge">Prompt-to-Production</p>
-        <h2>Build landing pages, product sites, and portfolio experiences in minutes.</h2>
-        <p>
-          VIRU transforms your idea into complete `HTML`, `CSS`, and `JS` with responsive layouts, clear structure,
-          and realistic conversion copy. Use quality presets, strict validation, and live diagnostics to control output quality.
-        </p>
-        <div class="hero-cta-row">
-          <a href="#authPanel" class="primary-link">Start with Login</a>
-          <a href="#workspace" class="ghost-link">Go to Generator</a>
+    <section class="panel usage-panel">
+      <h3>Minor Usages You Can Start With</h3>
+      <div class="usage-grid">
+        <article class="usage-card">
+          <h4>SaaS Launch Page</h4>
+          <p>Generate hero, features, pricing, FAQ, and contact sections with a consistent conversion flow.</p>
+        </article>
+        <article class="usage-card">
+          <h4>Portfolio Site</h4>
+          <p>Create project highlights, service blocks, personal branding copy, and lead capture CTA.</p>
+        </article>
+        <article class="usage-card">
+          <h4>Product Marketing</h4>
+          <p>Generate campaign pages with clear value messaging, social proof, and signup-oriented interactions.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="authPanel" class="panel auth-panel">
+      <div class="auth-head">
+        <h3>Account Access</h3>
+        <p>Register or login using Firebase Authentication. After login, your full auth object appears below.</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button id="tabLogin" class="auth-tab active" type="button">Login</button>
+        <button id="tabRegister" class="auth-tab" type="button">Register</button>
+      </div>
+
+      <form id="loginForm" class="auth-form" autocomplete="on">
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" type="email" required />
+
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" required minlength="6" />
+
+        <button type="submit" class="primary-btn">Login</button>
+      </form>
+
+      <form id="registerForm" class="auth-form hidden" autocomplete="on">
+        <label for="registerName">Display Name</label>
+        <input id="registerName" type="text" required minlength="2" />
+
+        <label for="registerEmail">Email</label>
+        <input id="registerEmail" type="email" required />
+
+        <label for="registerPassword">Password</label>
+        <input id="registerPassword" type="password" required minlength="6" />
+
+        <button type="submit" class="primary-btn">Create Account</button>
+      </form>
+
+      <div class="auth-actions">
+        <button id="logoutBtn" type="button" class="ghost-btn" disabled>Logout</button>
+        <p id="authStatus" class="status" role="status" aria-live="polite">Not authenticated.</p>
+      </div>
+
+      <h4>Authenticated User Object</h4>
+      <pre id="userObjectView" class="logs-view">Not logged in.</pre>
+    </section>
+
+    <section id="dashboard" class="panel dashboard-panel hidden">
+      <div class="dashboard-head">
+        <h3>Workspace Dashboard</h3>
+        <p>Recent generations, usage signals, and saved outputs.</p>
+      </div>
+      <div class="dashboard-grid">
+        <div class="dashboard-card">
+          <h4>Recent Generations</h4>
+          <ul id="recentList" class="recent-list"></ul>
         </div>
-        <div class="hero-steps">
+        <div class="dashboard-card">
+          <h4>Usage Snapshot</h4>
+          <div class="metric-row">
+            <div>
+              <p class="metric-label">Total Generations</p>
+              <p id="totalGenerations" class="metric-value">0</p>
+            </div>
+            <div>
+              <p class="metric-label">Avg Latency</p>
+              <p id="avgLatency" class="metric-value">0 ms</p>
+            </div>
+            <div>
+              <p class="metric-label">Last Quality</p>
+              <p id="lastQuality" class="metric-value">--</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="workspace" class="app-grid workspace-hidden" aria-hidden="true" hidden>
+      <section class="panel controls-panel">
+        <h2>Build Request</h2>
+        <p class="ai-tip">Describe product, audience, tone, and conversion goal. VIRU AI infers sections, CTA, and
+          structure.</p>
+
+        <div class="prompt-templates">
+          <button type="button" class="template-btn" data-template="saas">SaaS Launch</button>
+          <button type="button" class="template-btn" data-template="portfolio">Portfolio</button>
+          <button type="button" class="template-btn" data-template="ecommerce">Ecommerce</button>
+        </div>
+
+        <label for="prompt">Prompt</label>
+        <textarea id="prompt" rows="7"
+          placeholder="Example: Create a SaaS landing page for AI resume optimization with pricing, testimonials, FAQ, and contact form."></textarea>
+        <div class="prompt-hints" id="promptHints">Prompt quality: add audience, tone, sections, and CTA for best
+          results.</div>
+
+        <div class="row-2">
           <div>
-            <span class="step-index">01</span>
-            <h4>Describe the product</h4>
-            <p>Audience, tone, conversion goal, and pages.</p>
+            <label for="style">Style</label>
+            <select id="style">
+              <option value="modern saas">Modern SaaS</option>
+              <option value="editorial bold">Editorial Bold</option>
+              <option value="clean fintech">Clean Fintech</option>
+              <option value="playful startup">Playful Startup</option>
+            </select>
           </div>
           <div>
-            <span class="step-index">02</span>
-            <h4>Generate with AI</h4>
-            <p>VIRU enhances prompts and validates output.</p>
+            <label for="pages">Pages</label>
+            <input id="pages" type="number" min="1" max="5" value="1" />
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div>
+            <label for="qualityPreset">Quality Preset</label>
+            <select id="qualityPreset">
+              <option value="fast">Fast</option>
+              <option value="balanced" selected>Balanced</option>
+              <option value="premium">Premium</option>
+            </select>
+          </div>
+          <div class="toggle-col">
+            <label class="toggle-wrap" for="strictMode">
+              <input id="strictMode" type="checkbox" checked />
+              <span>Strict AI</span>
+            </label>
+            <label class="toggle-wrap" for="rewriteMode">
+              <input id="rewriteMode" type="checkbox" checked />
+              <span>Rewrite Seed</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <button id="healthBtn" class="ghost-btn" disabled aria-disabled="true">Provider Health Check</button>
+          <button id="generateBtn" class="primary-btn" disabled aria-disabled="true">Generate Website</button>
+        </div>
+        <p id="status" class="status" role="status" aria-live="polite"></p>
+
+        <div class="trust-row">
+          <span class="trust-chip">Powered by Groq</span>
+          <span class="trust-chip">Private by default</span>
+          <span class="trust-chip">Auth required</span>
+        </div>
+      </section>
+
+      <section class="panel output-panel">
+        <div class="output-header">
+          <h2 id="outputTitle">Generated Output</h2>
+          <p id="outputSource" class="chip">No output yet</p>
+        </div>
+
+        <div class="quality-panel">
+          <div>
+            <p class="metric-label">Quality Score</p>
+            <p id="qualityScore" class="metric-value">--</p>
           </div>
           <div>
-            <span class="step-index">03</span>
-            <h4>Ship faster</h4>
-            <p>Copy HTML/CSS/JS or download single file.</p>
+            <p class="metric-label">Validation</p>
+            <p id="validationSummary" class="metric-value">--</p>
           </div>
-        </div>
-      </section>
-
-      <section class="panel usage-panel">
-        <h3>Minor Usages You Can Start With</h3>
-        <div class="usage-grid">
-          <article class="usage-card">
-            <h4>SaaS Launch Page</h4>
-            <p>Generate hero, features, pricing, FAQ, and contact sections with a consistent conversion flow.</p>
-          </article>
-          <article class="usage-card">
-            <h4>Portfolio Site</h4>
-            <p>Create project highlights, service blocks, personal branding copy, and lead capture CTA.</p>
-          </article>
-          <article class="usage-card">
-            <h4>Product Marketing</h4>
-            <p>Generate campaign pages with clear value messaging, social proof, and signup-oriented interactions.</p>
-          </article>
-        </div>
-      </section>
-
-      <section id="authPanel" class="panel auth-panel">
-        <div class="auth-head">
-          <h3>Account Access</h3>
-          <p>Register or login using Firebase Authentication. After login, your full auth object appears below.</p>
-        </div>
-
-        <div class="auth-tabs">
-          <button id="tabLogin" class="auth-tab active" type="button">Login</button>
-          <button id="tabRegister" class="auth-tab" type="button">Register</button>
-        </div>
-
-        <form id="loginForm" class="auth-form" autocomplete="on">
-          <label for="loginEmail">Email</label>
-          <input id="loginEmail" type="email" required />
-
-          <label for="loginPassword">Password</label>
-          <input id="loginPassword" type="password" required minlength="6" />
-
-          <button type="submit" class="primary-btn">Login</button>
-        </form>
-
-        <form id="registerForm" class="auth-form hidden" autocomplete="on">
-          <label for="registerName">Display Name</label>
-          <input id="registerName" type="text" required minlength="2" />
-
-          <label for="registerEmail">Email</label>
-          <input id="registerEmail" type="email" required />
-
-          <label for="registerPassword">Password</label>
-          <input id="registerPassword" type="password" required minlength="6" />
-
-          <button type="submit" class="primary-btn">Create Account</button>
-        </form>
-
-        <div class="auth-actions">
-          <button id="logoutBtn" type="button" class="ghost-btn" disabled>Logout</button>
-          <p id="authStatus" class="status" role="status" aria-live="polite">Not authenticated.</p>
-        </div>
-
-        <h4>Authenticated User Object</h4>
-        <pre id="userObjectView" class="logs-view">Not logged in.</pre>
-      </section>
-
-      <section id="dashboard" class="panel dashboard-panel hidden">
-        <div class="dashboard-head">
-          <h3>Workspace Dashboard</h3>
-          <p>Recent generations, usage signals, and saved outputs.</p>
-        </div>
-        <div class="dashboard-grid">
-          <div class="dashboard-card">
-            <h4>Recent Generations</h4>
-            <ul id="recentList" class="recent-list"></ul>
-          </div>
-          <div class="dashboard-card">
-            <h4>Usage Snapshot</h4>
-            <div class="metric-row">
-              <div>
-                <p class="metric-label">Total Generations</p>
-                <p id="totalGenerations" class="metric-value">0</p>
-              </div>
-              <div>
-                <p class="metric-label">Avg Latency</p>
-                <p id="avgLatency" class="metric-value">0 ms</p>
-              </div>
-              <div>
-                <p class="metric-label">Last Quality</p>
-                <p id="lastQuality" class="metric-value">--</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="workspace" class="app-grid workspace-hidden" aria-hidden="true" hidden>
-        <section class="panel controls-panel">
-          <h2>Build Request</h2>
-          <p class="ai-tip">Describe product, audience, tone, and conversion goal. VIRU AI infers sections, CTA, and structure.</p>
-
-          <div class="prompt-templates">
-            <button type="button" class="template-btn" data-template="saas">SaaS Launch</button>
-            <button type="button" class="template-btn" data-template="portfolio">Portfolio</button>
-            <button type="button" class="template-btn" data-template="ecommerce">Ecommerce</button>
-          </div>
-
-          <label for="prompt">Prompt</label>
-          <textarea id="prompt" rows="7" placeholder="Example: Create a SaaS landing page for AI resume optimization with pricing, testimonials, FAQ, and contact form."></textarea>
-          <div class="prompt-hints" id="promptHints">Prompt quality: add audience, tone, sections, and CTA for best results.</div>
-
-          <div class="row-2">
-            <div>
-              <label for="style">Style</label>
-              <select id="style">
-                <option value="modern saas">Modern SaaS</option>
-                <option value="editorial bold">Editorial Bold</option>
-                <option value="clean fintech">Clean Fintech</option>
-                <option value="playful startup">Playful Startup</option>
-              </select>
-            </div>
-            <div>
-              <label for="pages">Pages</label>
-              <input id="pages" type="number" min="1" max="5" value="1" />
-            </div>
-          </div>
-
-          <div class="row-2">
-            <div>
-              <label for="qualityPreset">Quality Preset</label>
-              <select id="qualityPreset">
-                <option value="fast">Fast</option>
-                <option value="balanced" selected>Balanced</option>
-                <option value="premium">Premium</option>
-              </select>
-            </div>
-            <div class="toggle-col">
-              <label class="toggle-wrap" for="strictMode">
-                <input id="strictMode" type="checkbox" checked />
-                <span>Strict AI</span>
-              </label>
-              <label class="toggle-wrap" for="rewriteMode">
-                <input id="rewriteMode" type="checkbox" checked />
-                <span>Rewrite Seed</span>
-              </label>
-            </div>
-          </div>
-
-          <div class="top-actions">
-            <button id="healthBtn" class="ghost-btn" disabled aria-disabled="true">Provider Health Check</button>
-            <button id="generateBtn" class="primary-btn" disabled aria-disabled="true">Generate Website</button>
-          </div>
-          <p id="status" class="status" role="status" aria-live="polite"></p>
-
-          <div class="trust-row">
-            <span class="trust-chip">Powered by Groq</span>
-            <span class="trust-chip">Private by default</span>
-            <span class="trust-chip">Auth required</span>
-          </div>
-        </section>
-
-        <section class="panel output-panel">
-          <div class="output-header">
-            <h2 id="outputTitle">Generated Output</h2>
-            <p id="outputSource" class="chip">No output yet</p>
-          </div>
-
-          <div class="quality-panel">
-            <div>
-              <p class="metric-label">Quality Score</p>
-              <p id="qualityScore" class="metric-value">--</p>
-            </div>
-            <div>
-              <p class="metric-label">Validation</p>
-              <p id="validationSummary" class="metric-value">--</p>
-            </div>
-            <div>
-              <p class="metric-label">Latency</p>
-              <p id="latencySummary" class="metric-value">--</p>
-            </div>
-          </div>
-
-          <div id="pageTabs" class="tabs"></div>
-
-          <div class="code-actions">
-            <button data-code="html" class="code-tab active">HTML</button>
-            <button data-code="css" class="code-tab">CSS</button>
-            <button data-code="js" class="code-tab">JS</button>
-            <button id="combinedBtn" class="ghost-btn">Combined HTML</button>
-            <button id="copyBtn" class="ghost-btn">Copy Current Code</button>
-            <button id="downloadBtn" class="ghost-btn">Download HTML</button>
-          </div>
-
-          <pre id="codeView" class="code-view"></pre>
-
-          <h3>Live Preview</h3>
-          <iframe id="preview" title="Generated webpage preview"></iframe>
-
-          <h3>Generation Logs</h3>
-          <pre id="logsView" class="logs-view">No logs yet.</pre>
-        </section>
-      </section>
-
-      <section id="settings" class="panel settings-panel hidden">
-        <h3>Project Settings</h3>
-        <p class="ai-tip">This is an open source project. If you need any feature, suggest it directly.</p>
-
-        <div class="founder-card">
-          <div class="founder-avatar">PK</div>
           <div>
-            <p class="founder-label">Founder: Pratham Kumar</p>
-            <a class="founder-link" href="https://github.com/rajpratham1" target="_blank" rel="noopener noreferrer">
-              GitHub: github.com/rajpratham1
-            </a>
+            <p class="metric-label">Latency</p>
+            <p id="latencySummary" class="metric-value">--</p>
           </div>
         </div>
 
-        <div class="open-source">
-          <p>Repository:</p>
-          <a href="https://github.com/rajpratham1/VIRU-Frontend_Generator-" target="_blank" rel="noopener noreferrer">
-            github.com/rajpratham1/VIRU-Frontend_Generator-
+        <div id="pageTabs" class="tabs"></div>
+
+        <div class="code-actions">
+          <button data-code="html" class="code-tab active">HTML</button>
+          <button data-code="css" class="code-tab">CSS</button>
+          <button data-code="js" class="code-tab">JS</button>
+          <button id="combinedBtn" class="ghost-btn">Combined HTML</button>
+          <button id="copyBtn" class="ghost-btn">Copy Current Code</button>
+          <button id="downloadBtn" class="ghost-btn">Download HTML</button>
+        </div>
+
+        <pre id="codeView" class="code-view"></pre>
+
+        <h3>Live Preview</h3>
+        <iframe id="preview" title="Generated webpage preview"></iframe>
+
+        <h3>Generation Logs</h3>
+        <pre id="logsView" class="logs-view">No logs yet.</pre>
+      </section>
+    </section>
+
+    <section id="settings" class="panel settings-panel hidden">
+      <h3>Feedback</h3>
+      <p class="ai-tip">This is an open source project. If you need any feature, suggest it directly.</p>
+
+      <div class="founder-card">
+        <div class="founder-avatar">PK</div>
+        <div>
+          <p class="founder-label">Founder: Pratham Kumar</p>
+          <a class="founder-link" href="https://github.com/rajpratham1" target="_blank" rel="noopener noreferrer">
+            GitHub: github.com/rajpratham1
           </a>
         </div>
+      </div>
 
-        <form class="suggest-form" action="mailto:shrivastavapratham40@gmail.com" method="post" enctype="text/plain">
-          <label for="suggestName">Your Name</label>
-          <input id="suggestName" name="name" type="text" required />
+      <div class="open-source">
+        <p>Repository:</p>
+        <a href="https://github.com/rajpratham1/VIRU-Frontend_Generator-" target="_blank" rel="noopener noreferrer">
+          github.com/rajpratham1/VIRU-Frontend_Generator-
+        </a>
+      </div>
 
-          <label for="suggestEmail">Your Email</label>
-          <input id="suggestEmail" name="email" type="email" required />
+      <form class="suggest-form" action="mailto:shrivastavapratham40@gmail.com" method="post" enctype="text/plain">
+        <label for="suggestName">Your Name</label>
+        <input id="suggestName" name="name" type="text" required />
 
-          <label for="suggestMessage">Suggestion</label>
-          <textarea id="suggestMessage" name="message" rows="4" required></textarea>
+        <label for="suggestEmail">Your Email</label>
+        <input id="suggestEmail" name="email" type="email" required />
 
-          <button type="submit" class="primary-btn">Send Suggestion</button>
-        </form>
-      </section>
-    </main>
+        <label for="suggestMessage">Suggestion</label>
+        <textarea id="suggestMessage" name="message" rows="4" required></textarea>
 
-    <script type="module" src="{{ url_for('static', filename='js/app.js') }}"></script>
-  </body>
+        <button type="submit" class="primary-btn">Send Suggestion</button>
+      </form>
+    </section>
+  </main>
+
+  <script type="module" src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+
 </html>

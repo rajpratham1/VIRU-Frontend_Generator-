@@ -1,0 +1,42 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn() && request.auth.token.admin == true;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    match /users/{userId}/uploads/{fileName} {
+      allow read, write, delete: if isAdmin() || isOwner(userId);
+    }
+
+    match /users/{userId}/converted/{fileName} {
+      allow read, write, delete: if isAdmin() || isOwner(userId);
+    }
+
+    match /shares/{shareId}/{fileName} {
+      allow read: if true;
+      allow write, delete: if isAdmin();
+    }
+
+    match /published/{publishedId}/{fileName} {
+      allow read: if true;
+      allow write, delete: if isAdmin();
+    }
+
+    match /admin/{allPaths=**} {
+      allow read, write: if isAdmin();
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,7 +1,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
 import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
 
-const state = { user: null, result: null, pageIndex: 0, activeCode: 'html', recent: [], shareMode: 'edit' };
+const state = { user: null, result: null, pageIndex: 0, activeCode: 'html', recent: [], shareMode: 'edit', shareId: '', shareOwner: '' };
 
 const promptEl = document.getElementById('prompt');
 const styleEl = document.getElementById('style');
@@ -37,6 +37,8 @@ const exportNextBtn = document.getElementById('exportNextBtn');
 const createShareBtn = document.getElementById('createShareBtn');
 const sharePermissionEl = document.getElementById('sharePermission');
 const shareLinkEl = document.getElementById('shareLink');
+const publicShareLinkEl = document.getElementById('publicShareLink');
+const editShareLinkEl = document.getElementById('editShareLink');
 const shareStatusEl = document.getElementById('shareStatus');
 const deployNetlifyBtn = document.getElementById('deployNetlifyBtn');
 const deployVercelBtn = document.getElementById('deployVercelBtn');
@@ -341,6 +343,40 @@ function applyResult(data) {
   updateQualitySummary(data.logs || null);
 }
 
+function applyWorkspaceMeta(workspace = {}) {
+  if (typeof workspace.prompt === 'string' && workspace.prompt.trim()) {
+    promptEl.value = workspace.prompt;
+  }
+  if (typeof workspace.style === 'string' && workspace.style.trim()) {
+    styleEl.value = workspace.style;
+  }
+  if (workspace.pages) {
+    pagesEl.value = String(workspace.pages);
+  }
+  updatePromptHints();
+}
+
+async function saveSharedWorkspace(result, promptText) {
+  if (!state.shareId || state.shareMode !== 'edit' || !result) return;
+  const response = await fetch(`/api/share/${encodeURIComponent(state.shareId)}/save`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
+    body: JSON.stringify({
+      title: result.title || outputTitleEl.textContent || 'Generated Output',
+      prompt: promptText,
+      style: styleEl.value,
+      pages: Number(pagesEl.value || 1),
+      result,
+    }),
+  });
+  const data = await response.json();
+  if (!response.ok || !data.ok) {
+    throw new Error(data.error || 'Failed to save shared edits.');
+  }
+  if (publicShareLinkEl) publicShareLinkEl.value = data.share?.public_share_link || publicShareLinkEl.value;
+  if (editShareLinkEl) editShareLinkEl.value = data.share?.edit_share_link || editShareLinkEl.value;
+}
+
 async function saveProjectToCloud(result, promptText) {
   if (!state.user || !result) return;
   try {
@@ -394,6 +430,10 @@ async function generateWebsite() {
       setStatus('Website generated successfully.');
       saveRecentGeneration({ title: data.title || 'Generated Output', summary: (data.summary || '').slice(0, 120), latency: data.logs?.latency_ms || 0, quality: qualityScoreEl.textContent });
       await saveProjectToCloud(data, prompt);
+      if (state.shareMode === 'edit' && state.shareId) {
+        await saveSharedWorkspace(data, prompt);
+        setShareStatus(`Shared editor updated${state.shareOwner ? ` for ${state.shareOwner}` : ''}.`);
+      }
       generateBtn.disabled = false;
       return;
     } catch (error) {
@@ -458,13 +498,26 @@ async function createShareLink() {
     const response = await fetch('/api/share', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
-      body: JSON.stringify({ result: state.result, permission: sharePermissionEl.value }),
+      body: JSON.stringify({
+        title: state.result?.title || outputTitleEl.textContent || 'Generated Output',
+        prompt: promptEl.value.trim(),
+        style: styleEl.value,
+        pages: Number(pagesEl.value || 1),
+        result: state.result,
+        permission: sharePermissionEl.value,
+      }),
     });
     const data = await response.json();
     if (!response.ok || !data.ok) throw new Error(data.error || 'Share link creation failed.');
     shareLinkEl.value = data.share_link;
+    if (publicShareLinkEl) publicShareLinkEl.value = data.public_share_link || '';
+    if (editShareLinkEl) editShareLinkEl.value = data.edit_share_link || '';
     await navigator.clipboard.writeText(data.share_link);
-    setShareStatus(`Share link created (${data.permission}) and copied.`);
+    setShareStatus(
+      data.permission === 'edit'
+        ? 'Editor link created and copied. Public website link is also ready below.'
+        : 'Public website link created and copied. It opens directly without login.'
+    );
   } catch (error) {
     setShareStatus(error.message || 'Share link creation failed.', true);
   }
@@ -479,14 +532,22 @@ async function loadSharedProjectIfPresent() {
     const response = await fetch(`/api/share/${encodeURIComponent(shareId)}?perm=${encodeURIComponent(perm)}`, { headers: await authHeaders() });
     const data = await response.json();
     if (!response.ok || !data.ok) throw new Error(data.error || 'Failed to load shared project.');
+    state.shareId = shareId;
     state.shareMode = data.mode || 'view';
+    state.shareOwner = data.share?.owner_email || '';
     applyResult(data.result || {});
+    applyWorkspaceMeta(data.workspace || {});
+    if (publicShareLinkEl) publicShareLinkEl.value = data.share?.public_share_link || '';
+    if (editShareLinkEl) editShareLinkEl.value = data.share?.edit_share_link || '';
+    if (shareLinkEl) shareLinkEl.value = state.shareMode === 'edit' ? (data.share?.edit_share_link || '') : (data.share?.public_share_link || '');
     setShareStatus(`Loaded shared project by ${data.share?.owner_email || 'team'} in ${state.shareMode} mode.`);
     if (state.shareMode === 'view') {
       [promptEl, styleEl, pagesEl, qualityPresetEl, strictModeEl, rewriteModeEl, generateBtn, analyzeUrlBtn, enhancePromptBtn, cloneUrlEl, pasteUrlBtn].forEach((el) => {
         if (el) el.disabled = true;
       });
       setStatus('View-only share mode enabled.');
+    } else {
+      setStatus('Edit share loaded. Regenerate to publish updated changes to this shared workspace.');
     }
   } catch (error) {
     setShareStatus(error.message || 'Failed to load shared project.', true);
@@ -579,7 +640,11 @@ async function initApp() {
     const app = initializeApp(firebaseCfg);
     const auth = getAuth(app);
     onAuthStateChanged(auth, async (user) => {
-      if (!user) { window.location.href = '/auth'; return; }
+      if (!user) {
+        const next = `${window.location.pathname}${window.location.search}`;
+        window.location.href = `/auth?next=${encodeURIComponent(next)}`;
+        return;
+      }
       const isNewLogin = !state.user;
       state.user = user;
       authStatusEl.textContent = `Authenticated as ${user.email || user.uid}`;

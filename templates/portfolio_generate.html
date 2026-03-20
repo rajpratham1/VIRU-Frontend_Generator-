@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VIRU | Portfolio Builder</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+  </head>
+  <body data-portfolio-mode="{{ mode }}" data-portfolio-id="{{ portfolio_id }}">
+    <div class="bg-glow" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <a href="/app" class="brand-link" aria-label="VIRU workspace">
+        <div class="brand">
+          <img src="{{ url_for('static', filename='images/logo.png') }}" alt="VIRU logo" class="brand-logo" />
+          <div>
+            <p class="brand-kicker">Portfolio Workspace</p>
+            <h1>VIRU Portfolio</h1>
+          </div>
+        </div>
+      </a>
+      <div class="inline-actions">
+        <p id="portfolioAuthStatus" class="chip">Checking session...</p>
+        <a href="/dashboard" class="ghost-link">Dashboard</a>
+        <a href="/app" class="ghost-link">Workspace</a>
+        <button id="portfolioLogoutBtn" class="ghost-btn" type="button">Logout</button>
+      </div>
+    </header>
+
+    <main class="landing-shell portfolio-shell">
+      <section class="panel portfolio-hero">
+        <div>
+          <p class="hero-badge">Portfolio Builder</p>
+          <h2>Generate a clean personal portfolio with reusable templates, public sharing, and edit flow.</h2>
+          <p>Choose a template, add your profile details, projects, experience, and contact links, then publish a shareable portfolio page directly from VIRU.</p>
+        </div>
+        <div class="portfolio-hero-stats">
+          <article><span>Templates</span><strong>6 ready styles</strong></article>
+          <article><span>Flow</span><strong>Create, edit, publish, share</strong></article>
+          <article><span>Storage</span><strong>Firestore metadata + local photo files</strong></article>
+        </div>
+      </section>
+
+      <section class="portfolio-builder-grid">
+        <section class="panel portfolio-panel">
+          <div class="converter-section-head">
+            <h3>Choose Template</h3>
+            <p>Select a style before you publish. Preview opens in a new tab.</p>
+          </div>
+          <div id="templateGrid" class="portfolio-template-grid"></div>
+        </section>
+
+        <section class="panel portfolio-panel">
+          <div class="converter-section-head">
+            <h3>Portfolio Details</h3>
+            <p>Fill the core profile information and keep it short, clear, and professional.</p>
+          </div>
+          <form id="portfolioForm" class="portfolio-form">
+            <div class="converter-form-grid">
+              <div>
+                <label for="portfolioName">Full Name</label>
+                <input id="portfolioName" type="text" required />
+              </div>
+              <div>
+                <label for="portfolioHeadline">Headline</label>
+                <input id="portfolioHeadline" type="text" placeholder="Full-Stack Developer • UI Engineer" />
+              </div>
+            </div>
+            <div>
+              <label for="portfolioBio">Bio</label>
+              <textarea id="portfolioBio" rows="5" required></textarea>
+            </div>
+            <div>
+              <label for="portfolioSkills">Skills</label>
+              <input id="portfolioSkills" type="text" placeholder="React, Flask, Firebase, Python" />
+            </div>
+            <div class="converter-form-grid">
+              <div>
+                <label for="portfolioEmail">Email</label>
+                <input id="portfolioEmail" type="email" />
+              </div>
+              <div>
+                <label for="portfolioLinkedin">LinkedIn</label>
+                <input id="portfolioLinkedin" type="url" />
+              </div>
+              <div>
+                <label for="portfolioGithub">GitHub</label>
+                <input id="portfolioGithub" type="url" />
+              </div>
+              <div>
+                <label for="portfolioTwitter">Twitter / X</label>
+                <input id="portfolioTwitter" type="url" />
+              </div>
+            </div>
+            <div>
+              <label for="portfolioPhoto">Profile Photo</label>
+              <input id="portfolioPhoto" type="file" accept=".png,.jpg,.jpeg,.webp" />
+              <p id="portfolioPhotoStatus" class="status">No photo uploaded.</p>
+            </div>
+
+            <div class="portfolio-repeat-head">
+              <h4>Projects</h4>
+              <button id="addProjectBtn" type="button" class="ghost-btn">Add Project</button>
+            </div>
+            <div id="projectsList" class="portfolio-repeat-list"></div>
+
+            <div class="portfolio-repeat-head">
+              <h4>Experience</h4>
+              <button id="addExperienceBtn" type="button" class="ghost-btn">Add Experience</button>
+            </div>
+            <div id="experienceList" class="portfolio-repeat-list"></div>
+
+            <div class="top-actions">
+              <button id="savePortfolioBtn" class="primary-btn" type="submit">Save Portfolio</button>
+              <a id="openPortfolioBtn" href="#" class="ghost-link hidden" target="_blank" rel="noopener noreferrer">Open Public Page</a>
+            </div>
+            <p id="portfolioFormStatus" class="status">Waiting for login.</p>
+          </form>
+        </section>
+      </section>
+    </main>
+
+    <template id="projectTemplate">
+      <article class="portfolio-entry-card">
+        <div class="portfolio-entry-head">
+          <strong>Project</strong>
+          <button type="button" class="entry-remove-btn">Remove</button>
+        </div>
+        <div class="converter-form-grid">
+          <div>
+            <label>Title</label>
+            <input type="text" data-field="title" />
+          </div>
+          <div>
+            <label>Link</label>
+            <input type="url" data-field="link" />
+          </div>
+        </div>
+        <div>
+          <label>Description</label>
+          <textarea rows="3" data-field="description"></textarea>
+        </div>
+      </article>
+    </template>
+
+    <template id="experienceTemplate">
+      <article class="portfolio-entry-card">
+        <div class="portfolio-entry-head">
+          <strong>Experience</strong>
+          <button type="button" class="entry-remove-btn">Remove</button>
+        </div>
+        <div class="converter-form-grid">
+          <div>
+            <label>Company</label>
+            <input type="text" data-field="company" />
+          </div>
+          <div>
+            <label>Role</label>
+            <input type="text" data-field="title" />
+          </div>
+          <div>
+            <label>Duration</label>
+            <input type="text" data-field="duration" />
+          </div>
+        </div>
+        <div>
+          <label>Description</label>
+          <textarea rows="3" data-field="description"></textarea>
+        </div>
+      </article>
+    </template>
+
+    <script type="module" src="{{ url_for('static', filename='js/portfolio_generate.js') }}"></script>
+  </body>
+</html>

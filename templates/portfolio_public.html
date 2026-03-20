@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ portfolio.name }} | Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+  </head>
+  <body class="portfolio-public-page template-{{ template_meta.id }}{% if resume_mode %} resume-mode{% endif %}">
+    <main class="portfolio-public-shell">
+      <section class="portfolio-public-hero">
+        <div class="portfolio-public-copy">
+          <p class="portfolio-template-chip">{{ template_meta.label }}{% if preview_mode %} Preview{% endif %}</p>
+          <h1>{{ portfolio.name }}</h1>
+          {% if portfolio.headline %}
+          <h2>{{ portfolio.headline }}</h2>
+          {% endif %}
+          <p>{{ portfolio.bio }}</p>
+          <div class="portfolio-contact-row">
+            {% if portfolio.contact.email %}
+            <a href="mailto:{{ portfolio.contact.email }}">{{ portfolio.contact.email }}</a>
+            {% endif %}
+            {% if portfolio.contact.linkedin %}
+            <a href="{{ portfolio.contact.linkedin }}" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+            {% endif %}
+            {% if portfolio.contact.github %}
+            <a href="{{ portfolio.contact.github }}" target="_blank" rel="noopener noreferrer">GitHub</a>
+            {% endif %}
+            {% if portfolio.contact.twitter %}
+            <a href="{{ portfolio.contact.twitter }}" target="_blank" rel="noopener noreferrer">Twitter</a>
+            {% endif %}
+          </div>
+        </div>
+        <div class="portfolio-public-media">
+          {% if portfolio.photoURL %}
+          <img src="{{ portfolio.photoURL }}" alt="{{ portfolio.name }} profile photo" />
+          {% else %}
+          <div class="portfolio-public-avatar">{{ portfolio.name[:1] }}</div>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="portfolio-public-grid">
+        <article class="portfolio-public-card">
+          <h3>Skills</h3>
+          <div class="portfolio-skill-list">
+            {% for skill in portfolio.skills %}
+            <span>{{ skill }}</span>
+            {% endfor %}
+          </div>
+        </article>
+
+        <article class="portfolio-public-card">
+          <h3>Projects</h3>
+          <div class="portfolio-stack-list">
+            {% for project in portfolio.projects %}
+            <section>
+              <div class="portfolio-section-headline">
+                <strong>{{ project.title }}</strong>
+                {% if project.link %}
+                <a href="{{ project.link }}" target="_blank" rel="noopener noreferrer">Visit</a>
+                {% endif %}
+              </div>
+              <p>{{ project.description }}</p>
+            </section>
+            {% endfor %}
+          </div>
+        </article>
+
+        <article class="portfolio-public-card">
+          <h3>Experience</h3>
+          <div class="portfolio-stack-list">
+            {% for item in portfolio.experience %}
+            <section>
+              <div class="portfolio-section-headline">
+                <strong>{{ item.title }}</strong>
+                <span>{{ item.company }}</span>
+              </div>
+              {% if item.duration %}<small>{{ item.duration }}</small>{% endif %}
+              <p>{{ item.description }}</p>
+            </section>
+            {% endfor %}
+          </div>
+        </article>
+      </section>
+
+      {% if not preview_mode %}
+      <footer class="portfolio-public-footer">
+        <a href="/resume/{{ portfolio.id }}" target="_blank" rel="noopener noreferrer">Resume View</a>
+        <a href="/generate">Create Your Own</a>
+      </footer>
+      {% endif %}
+    </main>
+  </body>
+</html>

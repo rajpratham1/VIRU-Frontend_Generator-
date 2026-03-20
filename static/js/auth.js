@@ -28,6 +28,12 @@ function switchAuthTab(mode) {
   registerFormEl.classList.toggle('hidden', isLogin);
 }
 
+function nextPath() {
+  const params = new URLSearchParams(window.location.search);
+  const next = (params.get('next') || '').trim();
+  return next.startsWith('/') ? next : '/app';
+}
+
 async function fetchPublicConfig() {
   const response = await fetch('/api/public-config');
   const data = await response.json();
@@ -84,7 +90,7 @@ async function initAuthPage() {
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        window.location.href = '/app';
+        window.location.href = nextPath();
       } else {
         setStatus('Please login to continue.');
       }

@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VIRU | Document Converter</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+  </head>
+  <body>
+    <div class="bg-glow" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <a href="/" class="brand-link" aria-label="VIRU home">
+        <div class="brand">
+          <img src="{{ url_for('static', filename='images/logo.png') }}" alt="VIRU logo" class="brand-logo" />
+          <div>
+            <p class="brand-kicker">Document Workspace</p>
+            <h1>VIRU Converter</h1>
+          </div>
+        </div>
+      </a>
+      <div class="inline-actions">
+        <p id="converterAuthStatus" class="chip">Checking session...</p>
+        <a href="/conversions" class="ghost-link">My Conversions</a>
+        <a href="/admin/converter" class="ghost-link">Admin</a>
+        <a href="/app" class="ghost-link">Website Generator</a>
+      </div>
+    </header>
+
+    <main class="landing-shell converter-shell">
+      <section class="panel converter-hero">
+        <div>
+          <p class="hero-badge">Upload. Convert. Download.</p>
+          <h2>Professional document conversion with OCR-ready workflow and clean file handling.</h2>
+          <p>
+            This workspace is designed for PDF, DOCX, TXT, and image-based documents. Upload files, validate them,
+            configure target formats, preview source content, and prepare conversion jobs through one focused interface.
+          </p>
+        </div>
+        <div class="converter-hero-stats">
+          <article>
+            <span>Formats</span>
+            <strong>PDF, DOCX, TXT, PNG, JPG</strong>
+          </article>
+          <article>
+            <span>Pipeline</span>
+            <strong>Validation, OCR, Structure Repair</strong>
+          </article>
+          <article>
+            <span>Storage Model</span>
+            <strong>Firestore Metadata + Local Disk Files</strong>
+          </article>
+        </div>
+      </section>
+
+      <section class="converter-grid">
+        <section class="panel converter-panel">
+          <div class="converter-section-head">
+            <h3>Upload Files</h3>
+            <p>Drag files here or browse manually. Supported formats are validated instantly.</p>
+          </div>
+          <div class="feature-block">
+            <h4>Storage Mode</h4>
+            <p class="status">Metadata stays in Firestore. Uploaded and converted files stay on local disk to keep Firebase cost lower.</p>
+          </div>
+          <label id="dropZone" class="converter-dropzone" for="fileInput">
+            <input id="fileInput" type="file" multiple accept=".pdf,.docx,.txt,.png,.jpg,.jpeg" hidden />
+            <span class="converter-dropzone-kicker">Drop files here</span>
+            <strong>Select one or more documents</strong>
+            <p>Supported: PDF, DOCX, TXT, PNG, JPG, JPEG. Max 20 MB per file.</p>
+          </label>
+          <p id="uploadStatus" class="status">No files selected yet.</p>
+          <div id="fileList" class="converter-file-list"></div>
+        </section>
+
+        <section class="panel converter-panel">
+          <div class="converter-section-head">
+            <h3>Conversion Options</h3>
+            <p>Configure the output format and AI support per selected file.</p>
+          </div>
+          <div class="converter-form-grid">
+            <div>
+              <label for="sourceFormat">Detected Source</label>
+              <input id="sourceFormat" type="text" readonly value="No file selected" />
+            </div>
+            <div>
+              <label for="targetFormat">Target Format</label>
+              <select id="targetFormat">
+                <option value="">Select output format</option>
+              </select>
+            </div>
+            <div>
+              <label for="aiMode">AI Enhancement</label>
+              <select id="aiMode">
+                <option value="balanced">Balanced</option>
+                <option value="high">High Accuracy</option>
+                <option value="off">Off</option>
+              </select>
+            </div>
+            <div>
+              <label for="jobPriority">Processing Mode</label>
+              <select id="jobPriority">
+                <option value="standard">Standard</option>
+                <option value="fast">Fast</option>
+                <option value="quality">Quality First</option>
+              </select>
+            </div>
+          </div>
+          <div class="converter-checklist">
+            <label class="toggle-wrap" for="ocrEnabled">
+              <input id="ocrEnabled" type="checkbox" checked />
+              <span>Enable OCR for scanned files</span>
+            </label>
+            <label class="toggle-wrap" for="structureFix">
+              <input id="structureFix" type="checkbox" checked />
+              <span>Repair paragraphs and headings</span>
+            </label>
+            <label class="toggle-wrap" for="keepLayout">
+              <input id="keepLayout" type="checkbox" checked />
+              <span>Preserve formatting where possible</span>
+            </label>
+          </div>
+          <div class="top-actions">
+            <button id="prepareBtn" class="primary-btn" type="button">Run Conversion</button>
+            <button id="downloadSummaryBtn" class="ghost-btn" type="button">Download Request JSON</button>
+          </div>
+          <p id="jobStatus" class="status">Waiting for file selection.</p>
+        </section>
+
+        <section class="panel converter-panel">
+          <div class="converter-section-head">
+            <h3>Preview</h3>
+            <p>Review file metadata and available source preview before processing.</p>
+          </div>
+          <div id="previewMeta" class="converter-preview-meta">
+            <div><span>Name</span><strong>None</strong></div>
+            <div><span>Type</span><strong>None</strong></div>
+            <div><span>Size</span><strong>0 KB</strong></div>
+          </div>
+          <div id="previewPane" class="converter-preview-pane">
+            <p class="converter-empty">Select a file to preview its content and conversion readiness.</p>
+          </div>
+        </section>
+      </section>
+
+      <section class="converter-bottom-grid">
+        <section class="panel converter-panel">
+          <div class="converter-section-head">
+            <h3>Supported Conversion Paths</h3>
+            <p>Initial production-facing matrix for the document converter module.</p>
+          </div>
+          <div class="converter-path-grid">
+            <article><strong>PDF -> DOCX</strong><span>Structured document rebuild with OCR fallback</span></article>
+            <article><strong>DOCX -> PDF</strong><span>Preserve readable layout and section flow</span></article>
+            <article><strong>DOCX -> TXT</strong><span>Plain text extraction with cleanup</span></article>
+            <article><strong>TXT -> DOCX</strong><span>Paragraph grouping and heading inference</span></article>
+            <article><strong>PDF -> Image</strong><span>Page-level export for visual workflows</span></article>
+            <article><strong>Image -> PDF</strong><span>Single or grouped image-to-document flow</span></article>
+          </div>
+        </section>
+
+        <section class="panel converter-panel">
+          <div class="converter-section-head">
+            <h3>Prepared Jobs</h3>
+            <p>Completed backend conversion jobs with preview and direct download access.</p>
+          </div>
+          <div id="jobHistory" class="converter-history"></div>
+        </section>
+      </section>
+
+      <section id="converterAdminPanel" class="panel converter-panel hidden">
+        <div class="converter-section-head">
+          <h3>Admin Metrics</h3>
+          <p>Recent system-wide converter usage and format activity.</p>
+        </div>
+        <pre id="converterAdminMetrics" class="logs-view">Admin metrics unavailable.</pre>
+      </section>
+    </main>
+
+    <script type="module" src="{{ url_for('static', filename='js/converter.js') }}"></script>
+  </body>
+  </html>

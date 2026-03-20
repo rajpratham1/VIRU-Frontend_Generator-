@@ -49,6 +49,9 @@
         </div>
       </a>
       <div class="app-head-actions">
+        <a href="/generate" class="ghost-link">Portfolio</a>
+        <a href="/converter" class="ghost-link">Converter</a>
+        <a href="/conversions" class="ghost-link">My Conversions</a>
         <a href="/projects" class="ghost-link">My Work</a>
         <button id="settingsToggle" class="icon-btn" type="button" aria-label="Open project settings">&#9881;</button>
         <button id="logoutBtn" class="ghost-btn" type="button">Logout</button>
@@ -269,7 +272,9 @@
                 </select>
                 <button id="createShareBtn" class="ghost-btn" type="button">Create Share Link</button>
               </div>
-              <input id="shareLink" type="text" readonly placeholder="Share link appears here" />
+              <input id="shareLink" type="text" readonly placeholder="Primary share link appears here" />
+              <input id="publicShareLink" type="text" readonly placeholder="Public website link appears here" />
+              <input id="editShareLink" type="text" readonly placeholder="Editor link appears here" />
               <p id="shareStatus" class="status"></p>
             </div>
 
@@ -293,6 +298,18 @@
         </section>
       </section>
     </main>
+
+    <footer class="site-footer">
+      <div>
+        <h4>More Tools</h4>
+        <p>Use the AI Document Converter for upload, OCR-ready preparation, format mapping, and document workflow planning.</p>
+      </div>
+      <div>
+        <h4>Open Converter</h4>
+        <a href="/converter">Go to Document Converter</a>
+        <a href="/conversions">Open My Conversions</a>
+      </div>
+    </footer>
 
     <script type="module" src="{{ url_for('static', filename='js/app.js') }}"></script>
   </body>

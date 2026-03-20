@@ -1,0 +1,92 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Firestore is used only for metadata and app records.
+    // Binary files remain on local server disk in the current architecture.
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return signedIn() && request.auth.token.admin == true;
+    }
+
+    function sharesCanRead() {
+      return resource.data.permission == 'view'
+        || isAdmin()
+        || (signedIn() && (
+          request.auth.uid == resource.data.owner_uid
+          || (resource.data.editor_uids is list && request.auth.uid in resource.data.editor_uids)
+        ));
+    }
+
+    match /users/{userId} {
+      allow read, create, update, delete: if isOwner(userId) || isAdmin();
+    }
+
+    match /projects/{projectId} {
+      allow create: if signedIn() && request.resource.data.owner_uid == request.auth.uid;
+      allow read, update, delete: if isAdmin() || isOwner(resource.data.owner_uid);
+    }
+
+    match /shares/{shareId} {
+      allow create: if signedIn() && request.resource.data.owner_uid == request.auth.uid;
+      allow read: if sharesCanRead();
+      allow update, delete: if isAdmin()
+        || (signedIn() && (
+          request.auth.uid == resource.data.owner_uid
+          || (resource.data.editor_uids is list && request.auth.uid in resource.data.editor_uids)
+        ));
+    }
+
+    match /published/{publishedId} {
+      allow read: if resource.data.visibility == 'public'
+        || resource.data.permission == 'view'
+        || isAdmin()
+        || (signedIn() && request.auth.uid == resource.data.owner_uid);
+      allow create: if signedIn() && request.resource.data.owner_uid == request.auth.uid;
+      allow update, delete: if isAdmin() || isOwner(resource.data.owner_uid);
+    }
+
+    match /portfolios/{portfolioId} {
+      allow read: if resource.data.visibility == 'public'
+        || isAdmin()
+        || (signedIn() && request.auth.uid == resource.data.owner_uid);
+      allow create: if signedIn() && request.resource.data.owner_uid == request.auth.uid;
+      allow update, delete: if isAdmin() || isOwner(resource.data.owner_uid);
+    }
+
+    match /conversion_jobs/{jobId} {
+      allow create: if signedIn() && request.resource.data.owner_uid == request.auth.uid;
+      allow read, update, delete: if isAdmin() || isOwner(resource.data.owner_uid);
+    }
+
+    match /conversion_history/{historyId} {
+      allow create: if signedIn() && request.resource.data.owner_uid == request.auth.uid;
+      allow read, update, delete: if isAdmin() || isOwner(resource.data.owner_uid);
+    }
+
+    match /converter_uploads/{uploadId} {
+      allow create: if signedIn() && request.resource.data.owner_uid == request.auth.uid;
+      allow read, update, delete: if isAdmin() || isOwner(resource.data.owner_uid);
+    }
+
+    match /converter_jobs/{jobId} {
+      allow create: if signedIn() && request.resource.data.owner_uid == request.auth.uid;
+      allow read, update, delete: if isAdmin() || isOwner(resource.data.owner_uid);
+    }
+
+    match /admin_metrics/{metricId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
